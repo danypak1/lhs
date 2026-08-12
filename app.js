@@ -220,7 +220,24 @@ const stripMd = s => s.replace(/[*`_]/g, "").replace(/&/g, "&amp;").replace(/"/g
 
 /* ---------- router ---------- */
 
-function route() {
+/* Every screen change replaces the contents of #main, which destroys whatever
+   held focus. Without the wrapper below, focus fell back to the document and a
+   keyboard or screen-reader student restarted from stop 1 of the ~16 that come
+   before the content — 18 times in a module quiz, 48 in the exam — with nothing
+   announcing that a new screen existed. route() awaits the render (several are
+   async) and then puts focus on the screen itself. */
+let routedOnce = false;
+async function route() {
+  const rendered = routeTo();
+  const first = !routedOnce;
+  routedOnce = true;
+  try { await rendered; } catch { /* the screen reports its own failure */ }
+  if (first) return;                 // page load: leave focus where it started
+  const main = $("#main");
+  if (main && !main.contains(document.activeElement)) main.focus({ preventScroll: true });
+}
+
+function routeTo() {
   Drawer.close(false);
   /* Every navigation invalidates whatever was still rendering and takes down
      whatever was still listening. The keyboard half is not housekeeping: the
@@ -258,6 +275,14 @@ function route() {
   renderModule(m, tab || "learn");
 }
 window.addEventListener("hashchange", route);
+
+/* The skip link is a button, not an <a href="#main">: this app routes on the
+   hash, so an anchor jump would set location.hash to "#main" and the router
+   would read it as a module name and bounce the student to the home screen. */
+document.getElementById("skip-link")?.addEventListener("click", () => {
+  const main = document.getElementById("main");
+  if (main) { main.focus(); main.scrollIntoView({ block: "start" }); }
+});
 
 /* ---------- mobile drawer ---------- */
 
@@ -631,7 +656,7 @@ function buildToc(m, notes, tocEl) {
     <button class="toc-toggle" aria-expanded="false" aria-controls="toc-list">
       <span>Contents · ${heads.length} sections</span><span class="toc-caret">▾</span>
     </button>
-    <nav class="toc-list" id="toc-list">
+    <nav class="toc-list" id="toc-list" aria-label="Sections of this chapter">
       ${heads.map(h => `<a href="#${h.id}" data-id="${h.id}">${h.textContent}</a>`).join("")}
     </nav>`;
 
@@ -704,6 +729,12 @@ function scrollToPending(body) {
   if (el) {
     el.scrollIntoView({ behavior: "smooth", block: "start" });
     el.classList.add("flash");
+    /* Scrolling is the sighted half of "re-read section 5.11". Without the focus
+       move a screen-reader student lands at the top of a 9,000-word chapter, and
+       under prefers-reduced-motion the .flash highlight is suppressed too — so
+       that student got no confirmation at all that anything had happened. */
+    el.setAttribute("tabindex", "-1");
+    el.focus({ preventScroll: true });
   }
 }
 
@@ -1657,7 +1688,7 @@ function playMcq(ctx, body) {
               <span class="key-hint">${i + 1}</span>
             </button>`).join("")}
         </div>
-        <div id="feedback" role="status" aria-live="polite"></div>
+        <div id="feedback" role="status" aria-live="polite" tabindex="-1"></div>
         <div class="quiz-nav" id="quiz-nav"></div>
       </div>`;
 
@@ -1788,10 +1819,16 @@ function playMcq(ctx, body) {
       // student navigated back here on purpose.
       if (deferred && first && pos < total - 1) return showQuestion(order[pos + 1]);
 
-      const next = $("#next-q", body);
-      // preventScroll: a plain focus() yanked the page down ~280px on every
-      // answer, throwing the feedback the student is reading off screen.
-      if (next) next.focus({ preventScroll: true });
+      /* Focus the verdict, not the button. A focus change interrupts VoiceOver
+         and re-queues NVDA, so focusing "Next question →" here spoke the button's
+         own name over the polite region and the student never heard whether they
+         were right. The feedback box is focusable only as a target (tabindex -1),
+         so Tab from it still lands on Next.
+         preventScroll: a plain focus() yanked the page down ~280px on every
+         answer, throwing the feedback the student is reading off screen. */
+      const fb = $("#feedback", body);
+      if (fb && fb.textContent.trim()) fb.focus({ preventScroll: true });
+      else { const next = $("#next-q", body); if (next) next.focus({ preventScroll: true }); }
     }
   }
 }
@@ -1971,7 +2008,8 @@ function renderWrittenBody(m, item, kind) {
 
   if (kind === "short") {
     el.innerHTML = `
-      <textarea placeholder="Write your answer in full sentences…">${st.text || ""}</textarea>
+      <textarea aria-label="Your answer to ${stripMd(item.id)}"
+                placeholder="Write your answer in full sentences…">${st.text || ""}</textarea>
       <div class="row-gap">
         <button class="btn secondary" id="reveal-${item.id}">
           ${st.revealed ? "Marking checklist below" : "Mark my answer"}</button>
@@ -1981,7 +2019,8 @@ function renderWrittenBody(m, item, kind) {
     el.innerHTML = item.parts.map(part => `
       <div class="part-block">
         <div class="p-prompt">${part.id}) ${MD.inline(part.prompt)}</div>
-        <textarea placeholder="Your answer…" data-part="${part.id}">${(st.parts && st.parts[part.id]) || ""}</textarea>
+        <textarea aria-label="Your answer to part ${part.id}"
+                  placeholder="Your answer…" data-part="${part.id}">${(st.parts && st.parts[part.id]) || ""}</textarea>
       </div>`).join("") + `
       <div class="row-gap">
         <button class="btn secondary" id="reveal-${item.id}">
