@@ -36,6 +36,20 @@
   --radius: 12px;
   --sidebar-w: 264px;
   --topbar-h: 56px;
+
+  /* Where the two sticky bands park. On desktop there is no top bar, so the tab
+     bar sits at 0; on mobile everything shifts down by the top bar. Keeping the
+     offsets in variables is what stops the quiz bar from drifting under the tab
+     bar every time either band's padding changes. */
+  --bar-top: 0px;
+  --quiz-top: 62px;
+}
+
+@media (max-width: 899px) {
+  :root {
+    --bar-top: var(--topbar-h);
+    --quiz-top: 122px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -107,8 +121,7 @@
 
 /* Deep links from quiz feedback land on a heading — keep it clear of the
    sticky tab bar (and, on mobile, the top bar above it). */
-html { scroll-padding-top: 96px; }
-@media (max-width: 899px) { html { scroll-padding-top: 140px; } }
+html { scroll-padding-top: calc(var(--quiz-top) + 34px); }
 
 html, body {
   margin: 0;
@@ -117,7 +130,15 @@ html, body {
   color: var(--ink);
   font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* Safari inflates body text in landscape unless told not to, which reflowed
+     the notes to a different width in each orientation. */
+  -webkit-text-size-adjust: 100%;
 }
+
+/* Touch devices get no :hover, so without this a tap on an option or a nav row
+   gives no feedback at all until the screen re-renders — and Safari's default
+   grey flash lands on the wrong box. */
+body { -webkit-tap-highlight-color: transparent; }
 
 .layout { display: flex; min-height: 100vh; }
 
@@ -161,12 +182,16 @@ html, body {
 /* Course-progress ring. --p (0–100) is set from JS. */
 .topbar-ring {
   flex-shrink: 0;
+  position: relative;
   width: 32px; height: 32px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   background: conic-gradient(var(--accent) calc(var(--p, 0) * 1%), var(--line) 0);
 }
+/* A 32px ring is the right size to look at and the wrong size to hit. The
+   pseudo-element widens the target to 44px without thickening the ring. */
+.topbar-ring::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
 .topbar-ring span {
   width: 24px; height: 24px;
   border-radius: 50%;
@@ -228,7 +253,12 @@ html, body {
 
 /* Only the module list scrolls, so the attribution stays pinned at the bottom
    instead of being clipped once the progress block is added above it. */
-#module-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0; overflow-y: auto; }
+/* overscroll-behavior: flicking the module list to its end used to hand the
+   scroll on to the page underneath the drawer. */
+#module-nav {
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+}
 
 .nav-item {
   display: flex;
@@ -315,7 +345,7 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
    56px top bar. The band needs its own background or content shows through. */
 .tabbar {
   position: sticky;
-  top: 0;
+  top: var(--bar-top);
   z-index: 15;
   background: var(--bg);
   padding: 10px 0 16px;
@@ -515,12 +545,11 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
 
 .quiz-bar {
   position: sticky;
-  top: 62px;
+  top: var(--quiz-top);
   z-index: 12;
   background: var(--bg);
   padding-bottom: 14px;
 }
-@media (max-width: 899px) { .quiz-bar { top: 118px; } }
 
 .quiz-top {
   display: flex;
@@ -977,7 +1006,19 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
   font-size: 15px;
 }
 .md blockquote p { margin: 4px 0; }
-.md table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 14.5px; display: block; overflow-x: auto; }
+/* display:block + overflow-x is what lets a six-column table scroll sideways
+   inside the article on a phone instead of widening the whole page. */
+.md table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 100%;
+  margin: 16px 0;
+  font-size: 14.5px;
+  display: block;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
 .md th, .md td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
 .md th { background: var(--bg); font-weight: 600; }
 .md code { background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font-size: 13.5px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
@@ -1005,7 +1046,9 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
     z-index: 40;
     width: min(84vw, 320px);
     height: 100dvh;
-    padding: 18px 14px;
+    padding: max(18px, env(safe-area-inset-top)) 14px
+             max(18px, env(safe-area-inset-bottom))
+             max(14px, env(safe-area-inset-left));
     box-shadow: var(--shadow-drawer);
     visibility: hidden;
     transform: translateX(-100%);
@@ -1014,18 +1057,30 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
   body.nav-open .sidebar { visibility: visible; transform: none; }
   body.nav-open { overflow: hidden; }
 
-  .main { padding: 8px 16px 64px; }
-  .tabbar { top: 56px; }
+  /* env() keeps the text clear of the notch in landscape and of the home
+     indicator at the bottom. */
+  .main {
+    padding: 8px max(16px, env(safe-area-inset-right)) calc(72px + env(safe-area-inset-bottom))
+                 max(16px, env(safe-area-inset-left));
+  }
+  .topbar {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
   h1.page-title { font-size: 24px; }
   /* The top bar already names the module; the crumb trail and the standing
      "learn → practise → review" line are pure duplication on a phone. */
   .crumbs, .module-sub { display: none; }
-  .page-title + .tabbar { padding-top: 14px; }
+  /* A card at 24px a side spends 14% of a 375px screen on padding. */
+  .card { padding: 18px; }
 
   /* Contents collapses into a disclosure above the article instead of a column. */
   /* min-width:0 or the article refuses to shrink below its content width and
-     the card runs off the right edge. */
-  .learn-layout { display: flex; flex-direction: column-reverse; gap: 0; }
+     the card runs off the right edge. align-items is the other half of it: the
+     grid's `start` carries into the flex box, where it sizes the article to its
+     max-content width — one wide table in the notes and the whole page scrolled
+     sideways with the paragraphs cut off at the right edge. */
+  .learn-layout { display: flex; flex-direction: column-reverse; gap: 0; align-items: stretch; }
   .learn-layout > * { min-width: 0; }
   .toc { position: static; margin-bottom: 14px; }
   .toc-toggle {
@@ -1065,9 +1120,76 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
   .written-card .w-state { margin-left: auto; }
   .written-card .w-prompt { order: 3; flex: 1 0 100%; margin-top: 6px; }
   .written-card:not(.open) .w-prompt { -webkit-line-clamp: 2; }
-  .md { padding: 24px 18px; border-radius: 10px; }
+  .md { padding: 24px 16px; border-radius: 10px; }
   .resume-card { padding: 14px 16px; }
   .module-grid { grid-template-columns: 1fr; }
+
+  /* ---- tap targets ----
+     Everything below was sized for a mouse: 31px tabs, 36px nav rows, 30px
+     flag. A fingertip is about 9mm, which is why the guidance is 44px. */
+  /* Full width on a phone so each tab is a thumb-sized third; capped so the same
+     rule does not stretch three tabs across a tablet. */
+  .tabs { width: 100%; max-width: 440px; }
+  .tab { flex: 1; justify-content: center; padding: 8px 6px; min-height: 44px; }
+  /* Taller tabs buy their height back out of the band's padding, so the sticky
+     chrome above the question does not grow. --quiz-top tracks the total. */
+  .tabbar { padding: 8px 0 10px; }
+  .page-title + .tabbar { padding-top: 10px; }
+  .page.quiz-mode .tabbar { padding-top: 6px; padding-bottom: 8px; }
+  /* Two sticky bands plus the question stem is most of a phone screen. The
+     progress track does not need 24px of air under it. */
+  .quiz-bar { padding-bottom: 10px; }
+  .quiz-bar .progress-track { margin-bottom: 8px; }
+  .quiz-top { margin-bottom: 8px; }
+  .nav-item { padding: 10px; }
+  .btn { padding: 13px 20px; min-height: 44px; line-height: 18px; }
+  .flag-btn { width: 40px; height: 40px; }
+  .theme-toggle { padding: 11px 10px; }
+  .toc-list a { padding: 11px 12px; }
+  .lost-key summary { padding: 10px 0; }
+
+  /* ---- text fields ----
+     Anything under 16px makes iOS Safari zoom the page in on focus and never
+     zoom back out, which left students typing a written answer inside a
+     magnified layout they had to pinch their way out of. */
+  .written-card textarea,
+  .field input,
+  .lost-key input { font-size: 16px; }
+
+  /* ---- the quiz's way forward ----
+     The explanation under a wrong answer runs several hundred pixels; "Next
+     question" sat below all of it, so every question ended with a scroll past
+     text already read. Pinned to the bottom of the card, it is under the thumb
+     the moment feedback appears. */
+  .page.quiz-mode .quiz-nav {
+    position: sticky;
+    bottom: 0;
+    margin: 22px -18px -18px;
+    padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+    background: var(--panel);
+    border-top: 1px solid var(--line);
+    border-radius: 0 0 10px 10px;
+  }
+  .page.quiz-mode .quiz-nav:empty { display: none; }
+  /* The exam puts three buttons in this bar. Split across a third of a phone
+     they each wrap to two lines, so the one that moves the paper forward gets a
+     row of its own and Previous/Submit share the one below. */
+  .page.quiz-mode .quiz-nav { flex-wrap: wrap; }
+  .page.quiz-mode .quiz-nav .btn { flex: 1; text-align: center; white-space: nowrap; }
+  .page.quiz-mode .quiz-nav #next-q { flex: 1 0 100%; order: -1; }
+
+  /* Name over bar instead of beside it — at 150px of a 307px row the track was
+     down to 80px and read as a decoration rather than a score. */
+  .topic-row { flex-wrap: wrap; }
+  .topic-row .t-name { width: 100%; }
+
+  /* Touch has no hover, so this is the only press feedback there is. */
+  .option:not(:disabled):active,
+  .btn:active,
+  .module-card.enabled:active,
+  .nav-item.enabled:active,
+  .tool-card:active,
+  .resume-card:active { filter: brightness(.94); }
 }
 
 /* Desktop keeps the sidebar permanently visible; nothing to open or close. */

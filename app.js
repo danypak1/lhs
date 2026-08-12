@@ -449,6 +449,7 @@ async function renderModule(m, tab) {
 
   main.querySelectorAll(".tab").forEach(b =>
     b.addEventListener("click", () => go(`#/${m.id}/${b.dataset.tab}`)));
+  syncStickyOffsets();
 
   const body = $("#tab-body");
   try {
@@ -1461,7 +1462,21 @@ function quizMode(on) {
   const page = document.querySelector(".page");
   if (page) page.classList.toggle("quiz-mode", on);
   if (!on) QuizKeys.clear();
+  syncStickyOffsets();
 }
+
+/* The quiz bar parks directly under the tab bar. Its offset used to be two
+ * hard-coded numbers — one for desktop, one for phones — and every change to the
+ * tab bar's padding left the two bands overlapping on one of them. Measure it
+ * instead; `--quiz-top` also drives scroll-padding, so deep links from quiz
+ * feedback land clear of both bands. */
+function syncStickyOffsets() {
+  const bar = document.querySelector(".tabbar");
+  if (!bar) return;
+  const top = parseFloat(getComputedStyle(bar).top) || 0;
+  document.documentElement.style.setProperty("--quiz-top", `${Math.round(top + bar.offsetHeight)}px`);
+}
+addEventListener("resize", syncStickyOffsets);
 
 /* The question loop. Three screens use it — the module quiz, the mock exam and
  * the mistakes-review pass — so everything mode-specific arrives through `ctx`

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Life &amp; Health Science — the whole course, taught from zero</title>
   <meta name="description" content="Twelve modules of Life &amp; Health Science notes and 360 exam-style questions. Module 01 is free in full; the other eleven are $25 once. Every wrong answer tells you which misunderstanding it reveals and exactly what to re-read.">
-  <link rel="stylesheet" href="styles.css?v=25">
+  <link rel="stylesheet" href="styles.css?v=28">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧬</text></svg>">
   <!-- Honour the theme the student picked inside the app. In <head> and inline so
        the page never paints the wrong theme first. -->
@@ -134,7 +134,24 @@
     .price-card .btn { margin-top: auto; text-align: center; }
     .buy-how { font-size: 13.5px; color: var(--ink-faint); line-height: 1.6; margin: 0 0 64px; }
     .lp-foot { margin-top: 56px; font-size: 12px; color: var(--ink-faint); line-height: 1.6; }
-    @media (max-width: 640px) { .module-list { columns: 1; } .lp-nav { margin-bottom: 32px; } }
+    @media (max-width: 640px) {
+      .module-list { columns: 1; }
+      .lp-nav { margin-bottom: 32px; }
+      /* The page is read on a phone before it is read anywhere else. Full-width
+         buttons, facts in a tidy 2×2 instead of a ragged wrap, and padding that
+         clears the notch and the home indicator. */
+      .lp {
+        padding-left: max(20px, env(safe-area-inset-left));
+        padding-right: max(20px, env(safe-area-inset-right));
+        padding-bottom: calc(64px + env(safe-area-inset-bottom));
+      }
+      .hero .row-gap { display: grid; gap: 10px; }
+      .hero .row-gap .btn { text-align: center; }
+      .btn.big { padding: 15px 26px; }
+      .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 16px; margin: 36px 0 52px; }
+      .cta { padding: 26px 20px; }
+      .price-card, .demo, .feature { padding: 18px; }
+    }
   </style>
 </head>
 <body>
