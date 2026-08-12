@@ -114,29 +114,92 @@ const WHAT_A_KEY_BUYS = `A key unlocks the other eleven modules in full — note
    buying, not to remind a buyer of what they already own. */
 const needsKey = modId => !Api.isFree(modId) && !Api.token;
 
-/* Emailing a replacement key needs RESEND_API_KEY on the Worker, which needs a
-   verified sending domain — not set up yet. The endpoint and the form both work;
-   what would fail is the delivery, and a button that always errors is worse than
-   no button. Until the domain exists, "I've lost my key" points at Telegram.
-   Flip this to true once `wrangler secret put RESEND_API_KEY` has been done. */
-const EMAIL_RECOVERY = false;
+/* Anything interpolated into an HTML attribute goes through this. The one place
+   it matters is the unlock link: `#/unlock/<key>` arrives as whatever is in the
+   address bar, and it used to land in `value="…"` raw. Chrome percent-encodes
+   `"` `<` `>` in location.hash and so happened to be safe; Firefox and Safari do
+   not, and Safari is what a key pasted into a Telegram chat gets opened in. */
+const escapeAttr = s => String(s ?? "")
+  .replace(/&/g, "&amp;").replace(/"/g, "&quot;")
+  .replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /* ---------- progress store (localStorage) ---------- */
 
+/* One JSON blob under one key, read once and written whole. That shape is fine
+ * for one tab and quietly destructive with two: a student who opens the notes in
+ * a second tab — the obvious thing to do while sitting the exam in the first —
+ * had every write from one tab overwrite everything the other had done since it
+ * loaded. Scrolling the notes is enough to trigger it, because the contents
+ * handler saves the reading position on every section.
+ *
+ * The fix keeps the shape (nothing has to migrate) and makes each write a
+ * three-way merge instead of a blind overwrite: `_seen` is a snapshot of the
+ * state as of our last read or write, so for every top-level key we can tell
+ * whether *we* changed it, whether *they* did, or neither. Ours wins a genuine
+ * collision, which is right — we are writing because the student just acted in
+ * this tab. */
 const Store = {
   key: "lhs-progress-v1",
   data: null,
-  load() {
-    try { this.data = JSON.parse(localStorage.getItem(this.key)) || {}; }
-    catch { this.data = {}; }
+  _seen: {},
+
+  _snapshot() {
+    try { this._seen = JSON.parse(JSON.stringify(this.data)); }
+    catch { this._seen = {}; }
   },
-  save() { localStorage.setItem(this.key, JSON.stringify(this.data)); },
+
+  _stored() {
+    try { return JSON.parse(localStorage.getItem(this.key)) || {}; }
+    catch { return {}; }   // corrupt or half-written: treat as absent, never throw
+  },
+
+  /* theirs ∪ ours, deciding each top-level key by who moved it since `_seen`. */
+  _merge(theirs) {
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const merged = { ...theirs };
+    for (const k of new Set([...Object.keys(theirs), ...Object.keys(this.data || {})])) {
+      const base = this._seen[k], mine = (this.data || {})[k], their = theirs[k];
+      if (!same(mine, base)) merged[k] = mine;          // we changed it
+      else if (!same(their, base)) merged[k] = their;   // they changed it
+      else merged[k] = mine === undefined ? their : mine;
+      if (merged[k] === undefined) delete merged[k];
+    }
+    return merged;
+  },
+
+  load() {
+    this.data = this._stored();
+    this._snapshot();
+  },
+
+  save() {
+    this.data = this._merge(this._stored());
+    try { localStorage.setItem(this.key, JSON.stringify(this.data)); }
+    catch (e) {
+      // A full origin (github.io is shared with every other Pages site) turns
+      // every answer into a silent no-op. Say so once rather than never.
+      if (!this._warned) {
+        this._warned = true;
+        console.warn("Could not save progress — this browser's storage for the site is full.", e);
+      }
+    }
+    this._snapshot();
+  },
+
   module(id) {
     if (!this.data[id]) this.data[id] = { mcq: {}, mcqOrder: null, mcqIndex: 0, written: {} };
     return this.data[id];
   },
 };
 Store.load();
+
+/* Another tab wrote. Take what it did for anything we have not touched, so the
+   two views converge instead of racing. */
+addEventListener("storage", e => {
+  if (e.key !== Store.key) return;
+  Store.data = Store._merge(Store._stored());
+  Store._snapshot();
+});
 
 const $ = (sel, el = document) => el.querySelector(sel);
 const main = $("#main");
@@ -159,12 +222,30 @@ const stripMd = s => s.replace(/[*`_]/g, "").replace(/&/g, "&amp;").replace(/"/g
 
 function route() {
   Drawer.close(false);
+  /* Every navigation invalidates whatever was still rendering and takes down
+     whatever was still listening. The keyboard half is not housekeeping: the
+     quiz's keydown handler lives on `document`, so before this line, leaving a
+     quiz by any hash change left it installed. Pressing "2" on the notes or the
+     home page then recorded an answer the student never gave — into practice
+     scores, into the mistakes list, and in the exam over a live paper, since
+     deferred mode deliberately allows changing an answer. Reproduced on
+     2026-08-12: a cleared store went to `ch01:A1 picked b, correct false` from
+     one keystroke pressed on the home screen. */
+  beginRender();
+  QuizKeys.clear();
   const hash = location.hash.replace(/^#\/?/, "");
   const [mod, tab] = hash.split("/");
   renderNav(mod);
   // #/unlock/LHS-XXXXX-… — the link sent with the key, so the first sign-in
-  // is a click rather than twenty characters typed on a phone.
-  if (mod === "unlock") return renderLogin(hash.slice("unlock/".length));
+  // is a click rather than twenty characters typed on a phone. Decoded because
+  // Chrome percent-encodes parts of location.hash and Firefox does not: without
+  // this the same link sends a different string to the Worker in each.
+  if (mod === "unlock") {
+    const raw = hash.slice("unlock/".length);
+    let key;
+    try { key = decodeURIComponent(raw); } catch { key = raw; }
+    return renderLogin(key);
+  }
   if (mod === "login") return renderLogin();
   if (mod === "review") return renderReview();
   if (mod === "exam") return renderExam();
@@ -424,9 +505,21 @@ function resumeCard() {
  * silently kills the reading progress and the contents highlight. */
 let renderEpoch = 0;
 
-async function renderModule(m, tab) {
+/* Starts a new render: everything already in flight is now stale. */
+function beginRender() {
   const epoch = ++renderEpoch;
-  const alive = () => epoch === renderEpoch;
+  return () => epoch === renderEpoch;
+}
+
+/* Reads the current render without starting one — for code that runs *inside* a
+   render and must not invalidate its own parent. */
+function currentRender() {
+  const epoch = renderEpoch;
+  return () => epoch === renderEpoch;
+}
+
+async function renderModule(m, tab) {
+  const alive = beginRender();
   document.title = `${m.title} — LHS Study Guide`;
   PageScroll.clear();
   main.innerHTML = `
@@ -620,8 +713,30 @@ function scrollToPending(body) {
  * answers and rubrics throughout — comes from the Worker, because a file in the
  * published tree is a file anyone can open directly. */
 
+/* Two different people see this card, and they must not be told the same thing.
+   Someone who has never bought is deciding whether to; someone whose session
+   just ended has already paid, and showing them a padlock, the sales pitch and a
+   $25 button reads as "pay again" — the likeliest support message this product
+   can generate. The server cannot tell them apart (it returns the same 401 for an
+   evicted slot as for no key at all, deliberately, so a stranger learns nothing),
+   but the browser can: only a device that had a token can have lost one. */
 function renderLock(el, message, retry) {
-  el.innerHTML = `
+  const hadKey = Api.everSignedIn;
+  el.innerHTML = hadKey ? `
+    <div class="card lock-card">
+      <div class="lock-icon" aria-hidden="true">🔑</div>
+      <h3>You've been signed out on this device</h3>
+      <p class="muted">${message}</p>
+      <p class="muted lock-what">Your licence covers two devices at a time. Unlocking it
+        somewhere else signs out whichever device you used least recently — so if you have just
+        opened the course on a third, this one is the one that gave up its place. Sign in again
+        with the same key to take it back.</p>
+      <div class="row-gap">
+        <a class="btn" href="#/login">Sign in again</a>
+        <button class="btn secondary" id="lock-retry">Try again</button>
+        <a class="btn secondary" href="${CONTACT}" target="_blank" rel="noopener">Get help</a>
+      </div>
+    </div>` : `
     <div class="card lock-card">
       <div class="lock-icon" aria-hidden="true">🔒</div>
       <h3>This part needs a key</h3>
@@ -648,16 +763,33 @@ function renderLock(el, message, retry) {
    description tells a visitor what they would be buying; a summary is the thing
    itself. */
 function renderModuleTeaser(m, body, retry) {
+  /* The same distinction renderLock makes, and it has to be made here too: a
+     rejected token is cleared, which drops the reader back to "signed out", and
+     this is the screen they land on for a module tab. Found by walking the path
+     for real — the first version of the fix only covered renderLock, so a buyer
+     whose slot had just been taken still met "Module 07 needs a key" and a $25
+     button on the chapter they had opened. */
+  const hadKey = Api.everSignedIn;
   body.innerHTML = `
     <div class="card lock-card">
-      <div class="lock-icon" aria-hidden="true">🔒</div>
+      <div class="lock-icon" aria-hidden="true">${hadKey ? "🔑" : "🔒"}</div>
+      ${hadKey ? `
+      <h3>You've been signed out on this device</h3>
+      <p class="muted lock-what">Your licence covers two devices at a time, and unlocking it
+        somewhere else signs out whichever device you used least recently. Sign in again with the
+        same key to take this one back — nothing you have answered here is lost.</p>
+      <div class="row-gap">
+        <a class="btn" href="#/login">Sign in again</a>
+        <button class="btn secondary" id="teaser-retry">Try again</button>
+        <a class="btn secondary" href="${CONTACT}" target="_blank" rel="noopener">Get help</a>
+      </div>` : `
       <h3>Module ${m.num} needs a key</h3>
       <p class="muted lock-what">${WHAT_A_KEY_BUYS}</p>
       <div class="row-gap">
         ${buyButton()}
         <a class="btn secondary" href="#/login">I have a key</a>
         <button class="btn secondary" id="teaser-retry">Try again</button>
-      </div>
+      </div>`}
     </div>
     <div class="card teaser-about">
       <div class="card-head"><h3>What Module ${m.num} covers</h3><span class="pill">Preview</span></div>
@@ -748,12 +880,7 @@ function renderLogin(presetKey) {
           <label class="field">
             <span>Access key</span>
             <input type="text" id="login-key" autocomplete="off" spellcheck="false" required
-                   placeholder="LHS-XXXXX-XXXXX-XXXXX-XXXXX" value="${presetKey || ""}">
-          </label>
-          <label class="field" id="code-field" hidden>
-            <span>Confirmation code</span>
-            <input type="text" id="login-code" inputmode="numeric" autocomplete="one-time-code"
-                   placeholder="6-digit code">
+                   placeholder="LHS-XXXXX-XXXXX-XXXXX-XXXXX" value="${escapeAttr(presetKey)}">
           </label>
           <p class="login-msg" id="login-msg" role="status" aria-live="polite"></p>
           <div class="row-gap">
@@ -763,19 +890,11 @@ function renderLogin(presetKey) {
         </form>
         <details class="card lost-key">
           <summary>I've lost my key</summary>
-          ${EMAIL_RECOVERY ? `
-          <p class="muted">We'll email a new one to the address you bought with. The old key
-            stops working — which is also how you kill a key that has got out.</p>
-          <form class="row-gap" id="recover-form" novalidate>
-            <input type="email" id="recover-email" autocomplete="email" placeholder="you@example.com">
-            <button class="btn secondary" type="submit" id="recover-submit">Email me a new key</button>
-          </form>
-          <p class="login-msg" id="recover-msg" role="status" aria-live="polite"></p>` : `
           <p class="muted">Message me and I'll issue a new one. The old key stops working —
             which is also how you kill a key that has got out.</p>
           <div class="row-gap">
             <a class="btn secondary" href="${CONTACT}" target="_blank" rel="noopener">Message me on Telegram</a>
-          </div>`}
+          </div>
         </details>
         <ul class="muted login-terms">
           <li>Two devices at a time — a laptop and a phone. Unlocking a third signs out
@@ -799,8 +918,6 @@ function renderLogin(presetKey) {
   const form = $("#login-form");
   const msg = $("#login-msg");
   const submit = $("#login-submit");
-  const codeField = $("#code-field");
-  let awaitingCodeFor = null;
 
   const say = (text, cls = "") => { msg.textContent = text; msg.className = `login-msg ${cls}`; };
 
@@ -815,36 +932,10 @@ function renderLogin(presetKey) {
     const key = $("#login-key").value.trim();
     if (!key) return say("Paste the key you were sent.", "bad");
 
-    // Changing the key after a code was requested starts over, rather than
-    // checking a fresh key against the previous licence's code.
-    if (awaitingCodeFor === key) {
-      const code = $("#login-code").value.trim();
-      if (!code) return say("Enter the six-digit code from your email.", "bad");
-      submit.disabled = true;
-      say("Checking…");
-      try {
-        done((await Api.confirm(key, code)).evicted);
-      } catch (err) {
-        say(err.message, "bad");
-        submit.disabled = false;
-      }
-      return;
-    }
-
     submit.disabled = true;
     say("Checking…");
     try {
-      const result = await Api.claim(key);
-      if (result.needsCode) {
-        awaitingCodeFor = key;
-        codeField.hidden = false;
-        $("#login-code").focus();
-        submit.textContent = "Confirm";
-        say(`This licence has been used from a lot of places lately, so this device needs
-             confirming. We've emailed a code to ${result.emailHint}.`, "");
-      } else {
-        done(result.evicted);
-      }
+      done((await Api.claim(key)).evicted);
     } catch (err) {
       say(err.message, "bad");
     }
@@ -853,30 +944,8 @@ function renderLogin(presetKey) {
 
   form.addEventListener("submit", e => { e.preventDefault(); attempt(); });
 
-  const recover = $("#recover-form");
-  if (recover) recover.addEventListener("submit", async e => {
-    e.preventDefault();
-    const box = $("#recover-msg");
-    const email = $("#recover-email").value.trim();
-    if (!email) { box.textContent = "Enter the email you bought with."; box.className = "login-msg bad"; return; }
-    $("#recover-submit").disabled = true;
-    box.textContent = "Sending…";
-    box.className = "login-msg";
-    try {
-      await Api.recover(email);
-      // Says "if" on purpose: the server does not reveal whether an address
-      // bought the course, and neither should this screen.
-      box.textContent = "If that address has a licence, a new key is on its way.";
-      box.className = "login-msg good";
-    } catch (err) {
-      box.textContent = err.message;
-      box.className = "login-msg bad";
-      $("#recover-submit").disabled = false;
-    }
-  });
-
   // Arriving from the unlock link: try it straight away, so the first unlock is
-  // a click. If it needs a code, the form is already on screen to take it.
+  // a click rather than twenty characters typed on a phone.
   if (presetKey && !signedIn && Api.mode !== "local") attempt();
 }
 
@@ -954,11 +1023,12 @@ function mistakeIds() {
  * An instant-feedback run over an arbitrary set of qualified questions, writing
  * every answer through to the module it came from. Both #/review and the
  * "go through what you missed" step after the exam are this. */
-function fixPass({ items, body, onFinish }) {
+function fixPass({ items, body, onFinish, alive }) {
   const session = {};
   playMcq({
     items,
     feedback: "instant",
+    alive,
     // The store already holds an answer for every question that lands here —
     // that is how it got here — so the pass keeps its own session record.
     // Without it the player would see a finished set and jump to the results.
@@ -1009,6 +1079,11 @@ function fixResults({ items, session, body, again, back }) {
 /* ---------- mistakes pass (#/review) ---------- */
 
 async function renderReview() {
+  // Captured before the awaits below: navigating away while the questions load
+  // must stop the player from landing on — and wiring a keyboard handler to — a
+  // page the student has already left. Reading the epoch inside playMcq instead
+  // could never fire, because a player that starts late starts on the current one.
+  const alive = currentRender();
   document.title = "Work on your mistakes — LHS Study Guide";
   PageScroll.clear();
   main.innerHTML = `
@@ -1055,6 +1130,7 @@ async function renderReview() {
   fixPass({
     items,
     body,
+    alive,
     onFinish: session => fixResults({
       items, session, body,
       // The store is the source of truth for what is still wrong, so re-entering
@@ -1161,6 +1237,7 @@ const clock = ms => {
 };
 
 async function renderExam() {
+  const alive = currentRender();   // see renderReview
   document.title = "Mock exam — LHS Study Guide";
   PageScroll.clear();
   main.innerHTML = `
@@ -1236,6 +1313,7 @@ async function renderExam() {
     playMcq({
       items,
       feedback: "deferred",
+      alive,
       read: qid => ex.answers[qid],
       write: (qid, entry) => { ex.answers[qid] = entry; Store.save(); },
       isFlagged: qid => !!ex.flagged[qid],
@@ -1350,6 +1428,7 @@ async function renderExam() {
       fixPass({
         items: list,
         body,
+        alive,
         onFinish: session => {
           fixResults({
             items: list, session, body,
@@ -1414,11 +1493,11 @@ async function renderPractice(m, body, alive = () => true) {
 
   renderTopicSummary(m, q, $("#topic-summary"), "Your topics so far");
 
-  $("#start-mcq").addEventListener("click", () => runMcq(m, q, body));
+  $("#start-mcq").addEventListener("click", () => runMcq(m, q, body, alive));
   const reset = $("#reset-mcq");
   if (reset) reset.addEventListener("click", () => {
     p.mcq = {}; p.mcqIndex = 0; p.mcqOrder = null; p.flagged = {}; Store.save();
-    renderPractice(m, body); renderNav(m.id);
+    renderPractice(m, body, alive); renderNav(m.id);
   });
 
   renderWritten(m, q, "short");
@@ -1501,6 +1580,15 @@ addEventListener("resize", syncStickyOffsets);
 function playMcq(ctx, body) {
   const { items } = ctx;
   const deferred = ctx.feedback === "deferred";
+  /* Liveness comes from the caller, which captured it *before* its own awaits.
+     Reading the epoch here instead was the first attempt and it is true by
+     construction: a player that starts late starts on the current epoch, so the
+     guard could never fire for the case it was written for — a screen that spent
+     its load time being navigated away from. `route()` clearing the keyboard
+     handler is not enough on its own either, because showQuestion reinstalls one
+     after its await. Callers that cannot supply an `alive` get the old
+     behaviour rather than none. */
+  const alive = ctx.alive || currentRender();
   const total = items.length;
   const order = items.map(x => x.id);
   const answeredCount = () => order.filter(id => ctx.read(id)).length;
@@ -1524,10 +1612,26 @@ function playMcq(ctx, body) {
     if (!deferred && !Keys.has(qid)) {
       body.innerHTML = `<div class="card"><p class="muted">Loading question ${pos + 1}…</p></div>`;
       try { await Keys.ensure([qid]); }
-      catch (e) { return renderBlocked(body, e, () => showQuestion(qid)); }
+      catch (e) {
+        if (!alive()) return;
+        return renderBlocked(body, e, () => showQuestion(qid));
+      }
+      // The student navigated away while the key was in the air. Everything below
+      // writes to the DOM and installs a keydown handler; none of it belongs to
+      // the page that is on screen now.
+      if (!alive()) return;
     }
 
     const key = Keys.get(qid);
+    /* A key that never arrived is not an answered question. `Keys.ensure`
+       resolves whether or not the id came back, so without this the click
+       handler throws out of a listener (the question simply freezes with no
+       message) and the exam marks a right answer wrong. */
+    if (!deferred && !key) {
+      return renderBlocked(body,
+        new Error("That question's answer key did not arrive. Check your connection and try again."),
+        () => showQuestion(qid));
+    }
     const letters = Object.keys(item.options);
     const prior = ctx.read(qid);
 
@@ -1596,9 +1700,19 @@ function playMcq(ctx, body) {
        would read the whole explanation out again. */
     function paint(letter, announce) {
       if (deferred) {
-        // Exam conditions: show what was picked, never whether it was right.
-        body.querySelectorAll(".option").forEach(btn =>
-          btn.classList.toggle("picked", btn.dataset.letter === letter));
+        /* Exam conditions: show what was picked, never whether it was right.
+           `picked` used to be the *only* record of the choice — a tint measured
+           at 1.04:1 against the panel and no state in the accessibility tree at
+           all. A student reviewing a 48-question paper by screen reader, or
+           anyone who cannot separate that tint from the background, had no way
+           to tell which option they had chosen. `aria-pressed` puts it in the
+           tree; `.option.picked::after` puts a mark on the screen that is not a
+           colour. */
+        body.querySelectorAll(".option").forEach(btn => {
+          const on = btn.dataset.letter === letter;
+          btn.classList.toggle("picked", on);
+          btn.setAttribute("aria-pressed", String(on));
+        });
         return;
       }
       body.querySelectorAll(".option").forEach(btn => {
@@ -1685,7 +1799,7 @@ function playMcq(ctx, body) {
 /* The module quiz. It speaks qualified ids like every other screen — the key
  * store is course-wide — while progress stays keyed by the local id, so nothing
  * already saved in localStorage changes shape. */
-async function runMcq(m, q, body) {
+async function runMcq(m, q, body, alive) {
   const p = Store.module(m.id);
   const total = q.mcq.length;
   if (!p.flagged) p.flagged = {};
@@ -1695,6 +1809,7 @@ async function runMcq(m, q, body) {
   playMcq({
     items: q.mcq.map(x => ({ ...x, id: qualify(m.id, x.id), localId: x.id, modId: m.id })),
     feedback: "instant",
+    alive,
     read: qid => p.mcq[local(qid)],
     write: (qid, entry) => { p.mcq[local(qid)] = entry; Store.save(); renderNav(m.id); },
     isFlagged: qid => !!p.flagged[local(qid)],
@@ -1751,17 +1866,17 @@ async function runMcq(m, q, body) {
     if (rm) rm.addEventListener("click", () => {
       missed.forEach(id => delete p.mcq[local(id)]);
       Store.save();
-      runMcq(m, q, body);
+      runMcq(m, q, body, alive);
     });
     const rf = $("#retry-flagged", body);
     if (rf) rf.addEventListener("click", () => {
       flagged.forEach(id => delete p.mcq[local(id)]);
       Store.save();
-      runMcq(m, q, body);
+      runMcq(m, q, body, alive);
     });
     $("#retry-all", body).addEventListener("click", () => {
       p.mcq = {}; Store.save(); renderNav(m.id);
-      runMcq(m, q, body);
+      runMcq(m, q, body, alive);
     });
     $("#back-to-practice", body).addEventListener("click", () => {
       quizMode(false);
@@ -1892,10 +2007,13 @@ function renderWrittenBody(m, item, kind) {
     }));
 
   $(`#reveal-${item.id}`).addEventListener("click", async () => {
-    st.revealed = true;
-    Store.save();
+    /* `showModel` marks the item checked, and only once the mark scheme is
+       actually on screen. This used to be set — and saved — here, before the
+       fetch, so a request that failed left the item counted as "✓ checked" for
+       good, with nothing that ever set it back: the Part B/C progress pills then
+       claimed work the student had never seen. */
+    if (!await showModel(m, item, kind, st)) return;
     markCardState();
-    await showModel(m, item, kind, st);
     $(`#reveal-${item.id}`).textContent = "Marking checklist below";
   });
 
@@ -1905,6 +2023,8 @@ function renderWrittenBody(m, item, kind) {
 /* One written item's mark scheme and model answer — never the module's. Marking
  * yourself against B3 must not also hand over B1, B2 and every extended question
  * the student has not looked at yet. */
+/* Returns true once the mark scheme is on screen, false if it could not be
+   fetched — the caller uses that to decide whether the item counts as checked. */
 async function showModel(m, item, kind, st) {
   const box = $(`#model-${item.id}`);
   box.innerHTML = `<p class="muted">Loading the mark scheme…</p>`;
@@ -1912,7 +2032,8 @@ async function showModel(m, item, kind, st) {
   try {
     key = await Api.getWritten(m.id, item.id, kind);
   } catch (e) {
-    return renderBlocked(box, e, () => showModel(m, item, kind, st));
+    renderBlocked(box, e, () => showModel(m, item, kind, st));
+    return false;
   }
   st.checks = st.checks || {};
 
@@ -1980,6 +2101,12 @@ async function showModel(m, item, kind, st) {
     const plural = kind === "short" ? "answer" : "answers";
     toggle.textContent = st.modelShown ? `Hide model ${plural}` : `Show model ${plural}`;
   });
+
+  // The item is checked now, and only now — including when this call is the
+  // retry from a failed one.
+  st.revealed = true;
+  Store.save();
+  return true;
 }
 
 function wireChecks(box, st, totalMarks, itemId, review) {

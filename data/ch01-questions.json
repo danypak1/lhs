@@ -182,7 +182,7 @@
     {
       "id": "A17",
       "topic": "Organization & taxonomy",
-      "stem": "All the frogs in a pond, plus the fish, insects, plants and bacteria living there, together form a:",
+      "stem": "All the frogs in a pond, plus the fish, insects, plants and bacteria living there, together form:",
       "options": {
         "a": "population",
         "b": "community",
@@ -198,7 +198,7 @@
         "a": "Bacteria",
         "b": "Archaea",
         "c": "Eukarya",
-        "d": "Both Bacteria and Archaea"
+        "d": "Bacteria and Archaea"
       }
     }
   ],

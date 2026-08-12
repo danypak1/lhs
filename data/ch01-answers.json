@@ -349,10 +349,10 @@
           ]
         },
         "c": {
-          "model": "The capsule has organised parts (protein + nucleic acid) and, since it multiplies with nucleic-acid heredity, its populations could evolve. But it **cannot reproduce on its own** — only inside host cells — it has no metabolism of its own, maintains no homeostasis, and does not grow or develop. **Verdict: most biologists would not count it as fully alive.** It matches Earth's **viruses**, the classic borderline case that sits between chemistry and life precisely because it fails the \"all characteristics\" test while passing some.",
+          "model": "The capsule has organised parts (protein + nucleic acid) and, since it multiplies with nucleic-acid heredity, its populations could evolve. But it **cannot reproduce on its own** — only inside host cells — it has no metabolism of its own, maintains no homeostasis, and does not grow or develop. **Verdict: not alive by this definition.** Reproduction is required at the species level, but it must use the organism's **own** machinery — which is exactly what this capsule cannot do. It matches Earth's **viruses**, the classic borderline case that sits between chemistry and life precisely because it fails the \"all characteristics\" test while passing some.",
           "marks": [
             "Characteristics it shows (organisation, heredity/evolution) vs those it lacks (independent reproduction, metabolism, homeostasis)",
-            "Verdict: not fully alive / borderline, per most biologists",
+            "Verdict: not alive by this definition — it cannot copy its genes with its own machinery (the mule/childless-human exception does not apply, that is a species-level point)",
             "Identified as virus-like"
           ]
         },

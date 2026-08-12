@@ -119,6 +119,11 @@ Count the design features: one tested variable (echinacea); a placebo so no subj
 
 Field biology uses the same two principles. Malte Andersson asked whether the extravagantly long tails of male widowbirds attract females. He shortened the tails of one group of males, lengthened another group's tails (by gluing on the cut feathers), and — crucially — kept **control groups**: birds whose tails were cut and re-glued at the original length, and birds left entirely alone. Those controls matter because they separate the tested variable (tail *length*) from confounds (the stress of being caught, the cutting and gluing itself). Result: lengthened-tail males attracted the most mates. Because only tail length varied, the conclusion — females prefer longer tails — stands.
 
+
+> ### Coming here from extended question C1?
+> This section is that question's `review` target, and it answers parts (b), (c) and (d) — groups, controlled variables, randomisation, placebo and blinding. A question carries only one pointer, so these are the sections its other parts need:
+> - **(a)** → **§1.2** — the definitions of *hypothesis* and *prediction*, and the if/then form part (a) has to be written in
+
 ---
 
 ## 1.4 Repeatability and peer review — why one study is never enough
@@ -167,6 +172,12 @@ A theory is still not a proven fact — science never proves anything with absol
 - **Applied science** uses accumulated knowledge to solve a specific practical problem — e.g. developing a vaccine, a pest-resistant crop, or a diagnostic test.
 
 The two are not rivals; **applied science is built on basic science.** Basic research into bacterial immune systems looked useless for decades — then it became CRISPR gene editing. Nobody can predict which piece of basic knowledge will become tomorrow's technology, which is the standard argument for funding research with no obvious application.
+
+
+> ### Coming here from extended question C4?
+> This section is that question's `review` target, and it answers parts (b) and (d) — hypothesis vs. theory, and basic vs. applied science. A question carries only one pointer, so these are the sections its other parts need:
+> - **(a)** → **§1.2** — the observation → hypothesis → prediction → experiment sequence, with the worked table
+> - **(c)** → **§1.6** — cognitive bias — the self-protective mental shortcut Semmelweis’s colleagues were showing
 
 ---
 
@@ -218,6 +229,11 @@ Three details in that table are exam traps, so take them slowly:
 - **Reproduction is a species-level requirement — but it must be the organism's own.** A mule (sterile) and a childless human are alive; the criterion is that *some members of the species* reproduce, using their own cellular machinery. Both halves matter: the species-level half is what keeps a sterile individual alive, and the "own machinery" half is what excludes viruses below.
 - **Evolution never happens to an individual.** You will not evolve, no matter how long you live. Evolution is a shift in a *population's* genes across *generations*.
 - **All characteristics are required.** A crystal grows and is organised, but it has no metabolism, no homeostasis, no DNA-based reproduction — not alive. Fire consumes energy, grows and "reproduces", but has no cells, no homeostasis, no heredity — not alive. Apply the same rule to a **virus** and the verdict is clear: it has organised parts and it evolves, but it has no cells, no metabolism, no homeostasis, and it cannot copy its genes without commandeering a host cell's machinery. It fails several requirements, so **it is not alive** by this definition. (What people mean when they call viruses "debatable" is not that this rule gives an unclear answer — it is that some biologists argue the *rule itself* is drawn in the wrong place, since a virus does carry genes and does evolve. That is an argument about the definition, not an application of it.)
+
+
+> ### Coming here from extended question C3?
+> This section is that question's `review` target, and it answers parts (a), (b) and (c) — the characteristics of life and the two verdicts. A question carries only one pointer, so these are the sections its other parts need:
+> - **(d)** → **§1.9** — the three domains, and why "no nucleus" narrows it to Bacteria and Archaea
 
 ---
 

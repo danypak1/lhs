@@ -19,9 +19,7 @@
  * Worker is watching. Losing that property is how you lose the product.
  *
  * Worker contract (see ../worker/README.md):
- *   POST /auth/claim   {key, deviceId, label}       -> {token, …} | {needsCode, emailHint}
- *   POST /auth/verify  {key, code, deviceId, label} -> {token, …}  flagged licences only
- *   POST /auth/recover {email}                      -> {ok}
+ *   POST /auth/claim   {key, deviceId, label}       -> {token, …}
  *   POST /auth/logout                       Bearer  -> {ok}
  *   POST /keys    {ids:["ch02:A1", …]}        Bearer  -> {keys, notice?, token?}
  *   POST /written {module, itemId, kind}      Bearer  -> {key, notice?, token?}
@@ -43,11 +41,24 @@ const Api = {
      "this account is being used from a lot of places" nudge. */
   notice: null,
 
+  hadKeyKey: "lhs-had-key",
+
   get token() { return localStorage.getItem(this.tokenKey) || null; },
   set token(v) {
-    if (v) localStorage.setItem(this.tokenKey, v);
-    else localStorage.removeItem(this.tokenKey);
+    if (v) {
+      localStorage.setItem(this.tokenKey, v);
+      localStorage.setItem(this.hadKeyKey, "1");
+    } else localStorage.removeItem(this.tokenKey);
   },
+
+  /* Has this browser ever held a licence? Set when a token is granted and never
+     cleared, because its only job is to keep the lock card from selling the
+     course to somebody who has already bought it. The Worker answers an evicted
+     device and a stranger identically on purpose — a 401 that distinguished them
+     would tell anyone holding a key whether it was still live — so this is the
+     only place the difference can be known, and it is the client's own history
+     rather than anything the server said. */
+  get everSignedIn() { return localStorage.getItem(this.hadKeyKey) === "1"; },
 
   /* The client half of the device limit: the Worker counts slots, this supplies a
      stable id for this browser. Clearing site data gets you a new id and so costs
@@ -146,6 +157,8 @@ const Api = {
       this.token = null;
       Keys.clear();
       this._content = {};
+      this._stems = {};
+      this._written = {};
       throw this._err(data.error || "Your session has ended. Sign in again.", "auth");
     }
     if (r.status === 429) throw this._err(data.error || "Too many answers too quickly.", "rate");
@@ -159,11 +172,12 @@ const Api = {
 
   /* ---------- sign-in ----------
    *
-   * The credential is the key sent when the licence was issued — no mailbox, so
-   * a student who has just paid is studying seconds later. Email is held back for
-   * the two cases that need it: a licence the server has flagged, which must
-   * confirm a new device with a code sent to the buyer, and recovering a key
-   * somebody lost. */
+   * The credential is the key sent when the licence was issued, and it is the
+   * only credential there is — no mailbox anywhere, so a student who has just
+   * paid is studying seconds later. There were two email paths until 2026-08-12
+   * (a code confirming a new device on a flagged licence, and key recovery); both
+   * were removed with the Worker's mail path, because no buyer address is ever
+   * collected. A lost key is replaced by hand on Telegram. */
 
   _grant(data) {
     if (!data.token) throw this._err("The server did not return a token.", "auth");
@@ -171,42 +185,35 @@ const Api = {
     this.account = { email: data.email, name: data.name || null };
     Keys.clear();
     this._content = {};
+    this._stems = {};
+    this._written = {};
     // How many devices were signed out to make room, so the UI can say it plainly
     // instead of leaving the other device to find out on its own.
     return { evicted: data.evicted || 0, devices: data.devices || 2 };
   },
 
-  /* Either signs in outright, or comes back asking for an emailed code. */
+  /* The whole of signing in: one key, one request, one token. */
   async claim(key) {
     if (this.mode === "local") throw new Error("Sign-in is not used in local mode");
-    const data = await this._post("/auth/claim", {
+    return this._grant(await this._post("/auth/claim", {
       key, deviceId: this.deviceId, deviceLabel: this.deviceLabel,
-    }, { auth: false });
-    if (data.needsCode) return { needsCode: true, emailHint: data.emailHint };
-    return this._grant(data);
-  },
-
-  async confirm(key, code) {
-    if (this.mode === "local") throw new Error("Sign-in is not used in local mode");
-    return this._grant(await this._post("/auth/verify", {
-      key, code, deviceId: this.deviceId, deviceLabel: this.deviceLabel,
     }, { auth: false }));
-  },
-
-  /* Sends a fresh key and retires the old one — the same operation whether it was
-     lost or leaked. */
-  async recover(email) {
-    if (this.mode === "local") throw new Error("Sign-in is not used in local mode");
-    await this._post("/auth/recover", { email }, { auth: false });
   },
 
   async logout() {
     if (this.token) await this._post("/auth/logout", {}).catch(() => {});
     this.token = null;
+    // Signing out on purpose is the one case where this browser really has no
+    // licence any more, so the "you've been signed out" card would be wrong for
+    // it. Everything else keeps the flag, which is what stops the lock card
+    // selling the course to somebody who already owns it.
+    localStorage.removeItem(this.hadKeyKey);
     this.account = null;
     this.notice = null;
     Keys.clear();
     this._content = {};
+    this._stems = {};
+    this._written = {};
   },
 
   /* ---------- content ----------
@@ -236,11 +243,28 @@ const Api = {
      one-click export of the course. A key is a word; a module is the book. */
   _content: {},
 
+  /* Stems only, cached separately from the full module. */
+  _stems: {},
+
   /* Notes, stems and the summary arrive together in one request, so opening Learn,
      then Practice, then Summary costs one module against the budget, not three. The
      promise itself is cached, which also collapses two screens asking at once into
-     one call. */
+     one call.
+
+     But that bundling used to apply to *every* caller, and the exam and the
+     mistakes pass need nothing but the stems — of every module. One click on
+     "Mock exam" therefore fetched all eleven paid modules whole and handed the
+     entire written course to the browser, which is precisely what the metered
+     budget exists to prevent: the promise is that a shared login has to grind
+     through hundreds of requests, and this was one click. (Measured against a
+     local Worker: 11 content units, every module's notes and summary delivered.)
+     So a stems-only request is now a first-class case. A full fetch still costs
+     one unit and satisfies later stem reads; a stems fetch does not pre-empt a
+     later full one. */
   async _fetchContent(moduleId, part) {
+    if (part === "questions" && this._stems[moduleId] && !this._content[moduleId]) {
+      return (await this._stems[moduleId]).questions;
+    }
     let held = this._content[moduleId];
     if (!held) {
       held = this._content[moduleId] =
@@ -252,10 +276,23 @@ const Api = {
     return (await held)[part];
   },
 
-  getQuestions(moduleId) {
-    return this.isFree(moduleId)
-      ? this._json(`data/${moduleId}-questions.json`)
-      : this._fetchContent(moduleId, "questions");
+  /* The cross-module screens' entry point: stems, and nothing else. */
+  async _fetchStems(moduleId) {
+    if (this._content[moduleId]) return (await this._content[moduleId]).questions;
+    let held = this._stems[moduleId];
+    if (!held) {
+      held = this._stems[moduleId] =
+        this._post("/content", { module: moduleId, parts: ["questions"] });
+      held.catch(() => { delete this._stems[moduleId]; });
+    }
+    return (await held).questions;
+  },
+
+  /* `whole` is for the module screen, which is about to show the notes anyway;
+     the exam and the mistakes pass leave it off and get stems alone. */
+  getQuestions(moduleId, { whole = false } = {}) {
+    if (this.isFree(moduleId)) return this._json(`data/${moduleId}-questions.json`);
+    return whole ? this._fetchContent(moduleId, "questions") : this._fetchStems(moduleId);
   },
   getNotes(moduleId) {
     return this.isFree(moduleId)
@@ -282,13 +319,28 @@ const Api = {
     return data.keys || {};
   },
 
+  /* Model answers and mark schemes, cached for the session like the module text.
+     Without this, collapsing a written item and opening it again re-fetched it —
+     two budget units per re-open, no click that looks like a purchase, and no
+     indication to the student that anything was spent. Re-reading your own mark
+     scheme is the most ordinary thing a student does with this screen. In memory
+     only, for the same reason as `_content`: what is cached here is the part of
+     the product a leaked copy would consist of. */
+  _written: {},
+
   async getWritten(moduleId, itemId, kind) {
     if (this.isFree(moduleId)) {
       const answers = await this._localAnswers(moduleId);
       return answers[kind][itemId];
     }
-    const data = await this._post("/written", { module: moduleId, itemId, kind });
-    return data.key;
+    const cacheId = `${moduleId}:${kind}:${itemId}`;
+    let held = this._written[cacheId];
+    if (!held) {
+      held = this._written[cacheId] = this._post("/written", { module: moduleId, itemId, kind })
+        .then(data => data.key);
+      held.catch(() => { delete this._written[cacheId]; });
+    }
+    return held;
   },
 };
 

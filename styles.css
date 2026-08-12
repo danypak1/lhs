@@ -645,6 +645,10 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
    accent colour and not green — green reads as "correct" at a glance. */
 .option.picked { border-color: var(--accent); background: var(--accent-soft); }
 .option.picked .letter { color: var(--accent); }
+/* Not colour alone. In an exam there is no verdict text to fall back on, so the
+   only signal that an option was chosen was a tint measured at 1.04:1 against
+   the panel — invisible to a good many people and to every printed copy. */
+.option.picked .key-hint::before { content: "✓ "; font-weight: 700; color: var(--accent); }
 
 .feedback {
   margin-top: 18px;
@@ -1008,7 +1012,8 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
 .md blockquote p { margin: 4px 0; }
 /* display:block + overflow-x is what lets a six-column table scroll sideways
    inside the article on a phone instead of widening the whole page. */
-.md table {
+.md table,
+.model-box table {
   border-collapse: collapse;
   width: 100%;
   max-width: 100%;
@@ -1020,10 +1025,20 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
   -webkit-overflow-scrolling: touch;
 }
 .md th, .md td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
-.md th { background: var(--bg); font-weight: 600; }
-.md code { background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font-size: 13.5px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-.md pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 9px; padding: 14px 18px; overflow-x: auto; }
-.md pre code { background: none; border: 0; padding: 0; font-size: 13.5px; line-height: 1.55; }
+/* Model answers are rendered with MD.render into .model-box, which is not
+   .md — so the notes' table and code-fence rules never reached them. A
+   Punnett square came out with no grid lines at all, and a fenced block
+   471px wide sat in a 233px box with no way to scroll it: the student
+   marking their own work could not read the end of the line. */
+.model-box th, .model-box td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
+.md th,
+.model-box th { background: var(--bg); font-weight: 600; }
+.md code,
+.model-box code { background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font-size: 13.5px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+.md pre,
+.model-box pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 9px; padding: 14px 18px; overflow-x: auto; }
+.md pre code,
+.model-box pre code { background: none; border: 0; padding: 0; font-size: 13.5px; line-height: 1.55; }
 .md hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
 .md a { color: var(--accent); }
 .md em { color: var(--ink-soft); }
@@ -1143,8 +1158,15 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
   .quiz-top { margin-bottom: 8px; }
   .nav-item { padding: 10px; }
   .btn { padding: 13px 20px; min-height: 44px; line-height: 18px; }
-  .flag-btn { width: 40px; height: 40px; }
-  .theme-toggle { padding: 11px 10px; }
+  /* These three stayed at 40px after the phone pass — close enough to look
+     right, and measurably under the 9mm fingertip the rest of this block is
+     sized for. The ring above already solves it the tidy way: grow the hit area
+     with a pseudo-element, leave the drawn control alone. */
+  .flag-btn { width: 40px; height: 40px; position: relative; }
+  .flag-btn::after { content: ""; position: absolute; inset: -2px; }
+  .icon-btn { position: relative; }
+  .icon-btn::after { content: ""; position: absolute; inset: -2px; }
+  .theme-toggle { padding: 11px 10px; min-height: 44px; }
   .toc-list a { padding: 11px 12px; }
   .lost-key summary { padding: 10px 0; }
 
@@ -1212,9 +1234,51 @@ h1.page-title { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spaci
 
 /* ---------- print ----------
    The Summary tab is the revision sheet students print the night before. */
+/* Only ever seen on paper: the attribution that the sidebar carries on screen. */
+.print-credit { display: none; }
+
 @media print {
+  /* Paper is a third theme, and it had no token block. `html, body` below was
+     reset to black on white, but every other colour still came from whichever
+     theme the student was reading in — so printing from dark mode put
+     --ink-soft at 1.90:1, the ✓/✗ verdict at 1.80:1 and the ⚠️ slide-error rule
+     at 1.86:1 on white paper. Those are the exact things a printed revision copy
+     is for. Force the light palette regardless of what the screen was showing. */
+  :root, :root[data-theme="dark"] {
+    --bg: #ffffff;
+    --panel: #ffffff;
+    --ink: #000000;
+    --ink-soft: #333333;
+    --ink-faint: #555555;
+    --line: #999999;
+    --accent: #1a4fbf;
+    --accent-soft: #ffffff;
+    --accent-line: #999999;
+    --on-accent: #ffffff;
+    --green: #12662f;
+    --green-soft: #ffffff;
+    --green-line: #12662f;
+    --red: #8f1b12;
+    --red-soft: #ffffff;
+    --red-line: #8f1b12;
+    --amber: #6b4405;
+    --amber-soft: #ffffff;
+    --amber-line: #6b4405;
+    --code-bg: #f2f2f2;
+  }
   .topbar, .sidebar, .scrim, .tabbar, .crumbs, .toc, .resume-section,
-  .quiz-nav, .btn, .theme-toggle, .tool-grid { display: none !important; }
+  .quiz-nav, .btn, .theme-toggle, .tool-grid,
+  /* Screen furniture with nothing to say on paper: the sticky quiz band, the
+     flag control and the progress bars, which print as empty rectangles. */
+  .quiz-bar, .flag-btn, .progress-track, .read-progress { display: none !important; }
+  .print-credit {
+    display: block;
+    margin-top: 2em;
+    padding-top: 0.75em;
+    border-top: 1px solid #999;
+    font-size: 9pt;
+    color: #333;
+  }
   html, body { background: #fff; color: #000; }
   .main { padding: 0; }
   .page, .page.wide { max-width: none; }

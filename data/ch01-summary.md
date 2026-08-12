@@ -44,7 +44,7 @@ Andersson's widowbirds: cut-and-reglued-tail controls separate tail *length* fro
 
 ### 4. Trust filters
 
-- **Repeatability:** once is never enough; big follow-ups overturn small studies (2005 "epilepsy drug cures AIDS" — killed by huge 2008 study). Conflicting studies → **go with the majority**, ignore lone outliers
+- **Repeatability:** once is never enough; big follow-ups overturn small studies (2005 "epilepsy drug cures AIDS" — killed by huge 2008 study). Conflicting studies → **go with the majority**, treating the lone contradictory study as a **likely** outlier (chance or error) rather than a revolution
 - **Peer review:** other scientists vet methods, data, conclusions before publication; not all journals do it anymore; names hidden to fight (subconscious) **bias**
 - **Pseudoscience** = claims to be factual but is **incompatible with the scientific method** (unfalsifiable)
 - **Cognitive bias** = mental shortcut → selective, subjective processing → irrational judgments
