@@ -1,0 +1,411 @@
+/* Data access layer.
+ *
+ * PROTOTYPE mode ("local"): everything, answer key included, comes from ./data/.
+ * Fine for development; anyone can read the key straight out of the bundle.
+ *
+ * PRODUCTION mode ("remote"): the static site ships the free module in full and
+ * nothing else of the course. Everything else lives behind the Worker in
+ * ../worker/ — the answer key, the diagnostics, the model answers and the mark
+ * schemes, and the notes, question stems and summaries of the paid modules. The
+ * last of those is not belt-and-braces: a file under data/ is a file in the public
+ * Pages repo, so a module can only really need a key if its text is not published
+ * at all.
+ *
+ * The one rule that shapes this file: **the key is never fetched in bulk.** A
+ * signed-in student pulls the handful of questions they are actually looking at,
+ * plus a few ahead in the background so the click still feels instant. That way a
+ * shared login does not hand over the course in twelve requests — it hands over a
+ * session that has to grind through hundreds of them, against an hourly budget the
+ * Worker is watching. Losing that property is how you lose the product.
+ *
+ * Worker contract (see ../worker/README.md):
+ *   POST /auth/claim   {key, deviceId, label}       -> {token, …} | {needsCode, emailHint}
+ *   POST /auth/verify  {key, code, deviceId, label} -> {token, …}  flagged licences only
+ *   POST /auth/recover {email}                      -> {ok}
+ *   POST /auth/logout                       Bearer  -> {ok}
+ *   POST /keys    {ids:["ch02:A1", …]}        Bearer  -> {keys, notice?, token?}
+ *   POST /written {module, itemId, kind}      Bearer  -> {key, notice?, token?}
+ *   POST /content {module, parts}             Bearer  -> {notes?, questions?, summary?, …}
+ */
+
+const Api = {
+  mode: "remote", // "local" reads ./data/ including the key — development only
+  base: "https://lhs-api.danypak.workers.dev",
+                  // deployed 2026-08-11 from ../worker.
+                  // (locally: "http://127.0.0.1:8788" against `wrangler dev`,
+                  //  which is the `lhs-worker` entry in .claude/launch.json)
+
+  tokenKey: "lhs-token",
+  deviceKey: "lhs-device",
+  accountKey: "lhs-account",
+
+  /* Whatever the server last wanted the student to know — currently only the
+     "this account is being used from a lot of places" nudge. */
+  notice: null,
+
+  get token() { return localStorage.getItem(this.tokenKey) || null; },
+  set token(v) {
+    if (v) localStorage.setItem(this.tokenKey, v);
+    else localStorage.removeItem(this.tokenKey);
+  },
+
+  /* The client half of the device limit: the Worker counts slots, this supplies a
+     stable id for this browser. Clearing site data gets you a new id and so costs
+     the account a slot — the right trade, because the alternative is a
+     fingerprint that would follow the student between accounts. */
+  get deviceId() {
+    let id = localStorage.getItem(this.deviceKey);
+    if (!id) {
+      id = crypto.randomUUID ? crypto.randomUUID()
+        : `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}`;
+      localStorage.setItem(this.deviceKey, id);
+    }
+    return id;
+  },
+
+  /* So "it signed me out on my phone" names a device the student recognises
+     rather than a UUID. */
+  get deviceLabel() {
+    const ua = navigator.userAgent;
+    const device = /iPhone/.test(ua) ? "iPhone" : /iPad/.test(ua) ? "iPad"
+      : /Android/.test(ua) ? "Android phone" : /Macintosh/.test(ua) ? "Mac"
+      : /Windows/.test(ua) ? "Windows PC" : "Computer";
+    const browser = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome"
+      : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "browser";
+    return `${device} · ${browser}`;
+  },
+
+  /* {email, name} of whoever is signed in. The answer cards print it: a student
+     who can see their own address on every explanation thinks twice before
+     pasting one into the year group chat. */
+  get account() {
+    try { return JSON.parse(localStorage.getItem(this.accountKey) || "null"); }
+    catch { return null; }
+  },
+  set account(v) {
+    if (v) localStorage.setItem(this.accountKey, JSON.stringify(v));
+    else localStorage.removeItem(this.accountKey);
+  },
+
+  /* True when the key is server-held and we have no token yet. Always false in
+     local mode, so the prototype behaves exactly as it always did. */
+  get locked() { return this.mode === "remote" && !this.token; },
+
+  _cache: {},
+
+  async _json(path) {
+    if (this._cache[path]) return this._cache[path];
+    const r = await fetch(path);
+    if (!r.ok) throw new Error(`Failed to load ${path}: ${r.status}`);
+    const data = await r.json();
+    this._cache[path] = data;
+    return data;
+  },
+
+  async _text(path) {
+    if (this._cache[path]) return this._cache[path];
+    const r = await fetch(path);
+    if (!r.ok) throw new Error(`Failed to load ${path}: ${r.status}`);
+    const data = await r.text();
+    this._cache[path] = data;
+    return data;
+  },
+
+  /* Errors carrying code "auth" are the ones the UI turns into an unlock card
+     rather than a "something went wrong" message. "rate" gets its own wording:
+     being throttled is not being signed out, and saying so saves the student a
+     pointless round of sign-in attempts. */
+  _err(message, code) {
+    const e = new Error(message);
+    if (code) e.code = code;
+    return e;
+  },
+
+  async _post(path, body, { auth = true } = {}) {
+    const headers = { "Content-Type": "application/json" };
+    if (auth) {
+      // Reached for locked notes and questions as well as for answers now, so it
+      // cannot promise anything narrower than "this part".
+      if (!this.token) throw this._err("Sign in with your key to open this.", "auth");
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    let r;
+    try {
+      r = await fetch(`${this.base}${path}`, {
+        method: "POST", headers, body: JSON.stringify(body),
+      });
+    } catch {
+      throw this._err("No connection to the answer service. Check your network and try again.", "net");
+    }
+
+    const data = await r.json().catch(() => ({}));
+
+    if (r.status === 401 || r.status === 403) {
+      // Either the token expired, or a third device took this one's slot.
+      this.token = null;
+      Keys.clear();
+      this._content = {};
+      throw this._err(data.error || "Your session has ended. Sign in again.", "auth");
+    }
+    if (r.status === 429) throw this._err(data.error || "Too many answers too quickly.", "rate");
+    if (!r.ok) throw this._err(data.error || `Request failed (${r.status})`);
+
+    // The Worker re-issues a token quietly as the old one nears its expiry.
+    if (data.token) this.token = data.token;
+    if (data.notice) this.notice = data.notice;
+    return data;
+  },
+
+  /* ---------- sign-in ----------
+   *
+   * The credential is the key sent when the licence was issued — no mailbox, so
+   * a student who has just paid is studying seconds later. Email is held back for
+   * the two cases that need it: a licence the server has flagged, which must
+   * confirm a new device with a code sent to the buyer, and recovering a key
+   * somebody lost. */
+
+  _grant(data) {
+    if (!data.token) throw this._err("The server did not return a token.", "auth");
+    this.token = data.token;
+    this.account = { email: data.email, name: data.name || null };
+    Keys.clear();
+    this._content = {};
+    // How many devices were signed out to make room, so the UI can say it plainly
+    // instead of leaving the other device to find out on its own.
+    return { evicted: data.evicted || 0, devices: data.devices || 2 };
+  },
+
+  /* Either signs in outright, or comes back asking for an emailed code. */
+  async claim(key) {
+    if (this.mode === "local") throw new Error("Sign-in is not used in local mode");
+    const data = await this._post("/auth/claim", {
+      key, deviceId: this.deviceId, deviceLabel: this.deviceLabel,
+    }, { auth: false });
+    if (data.needsCode) return { needsCode: true, emailHint: data.emailHint };
+    return this._grant(data);
+  },
+
+  async confirm(key, code) {
+    if (this.mode === "local") throw new Error("Sign-in is not used in local mode");
+    return this._grant(await this._post("/auth/verify", {
+      key, code, deviceId: this.deviceId, deviceLabel: this.deviceLabel,
+    }, { auth: false }));
+  },
+
+  /* Sends a fresh key and retires the old one — the same operation whether it was
+     lost or leaked. */
+  async recover(email) {
+    if (this.mode === "local") throw new Error("Sign-in is not used in local mode");
+    await this._post("/auth/recover", { email }, { auth: false });
+  },
+
+  async logout() {
+    if (this.token) await this._post("/auth/logout", {}).catch(() => {});
+    this.token = null;
+    this.account = null;
+    this.notice = null;
+    Keys.clear();
+    this._content = {};
+  },
+
+  /* ---------- content ----------
+   *
+   * Where the paid line falls:
+   *
+   *   free module   notes, summary, questions, answers — all static files
+   *   paid modules  notes, summary and questions all from the Worker
+   *
+   * The summaries used to ship in the public tree as the shop window for a locked
+   * module. They no longer do: a high-yield summary is the chapter distilled, so
+   * eleven of them free is most of the revision value given away. What a locked
+   * module shows instead is a *description* — see MODULES in app.js — which is
+   * about the chapter rather than part of it.
+   *
+   * FREE_MODULES is named in three places and they must agree: here,
+   * worker/build-content.mjs (FREE) and _internal/publish-site.py (FREE_MODULE).
+   * The publish script reads the other two and refuses to build on a mismatch,
+   * so drift fails a deploy instead of quietly locking or unlocking a module. */
+
+  FREE_MODULES: ["ch01"],
+
+  isFree(moduleId) { return this.mode === "local" || this.FREE_MODULES.includes(moduleId); },
+
+  /* Paid content, cached for the session in memory only. Not localStorage: the
+     notes are the bulk of the product, and a copy sitting in storage is a
+     one-click export of the course. A key is a word; a module is the book. */
+  _content: {},
+
+  /* Notes, stems and the summary arrive together in one request, so opening Learn,
+     then Practice, then Summary costs one module against the budget, not three. The
+     promise itself is cached, which also collapses two screens asking at once into
+     one call. */
+  async _fetchContent(moduleId, part) {
+    let held = this._content[moduleId];
+    if (!held) {
+      held = this._content[moduleId] =
+        this._post("/content", { module: moduleId, parts: ["notes", "questions", "summary"] });
+      // A failed fetch must not become a cached failure: the lock card offers
+      // "Try again", and that has to be able to actually try again.
+      held.catch(() => { delete this._content[moduleId]; });
+    }
+    return (await held)[part];
+  },
+
+  getQuestions(moduleId) {
+    return this.isFree(moduleId)
+      ? this._json(`data/${moduleId}-questions.json`)
+      : this._fetchContent(moduleId, "questions");
+  },
+  getNotes(moduleId) {
+    return this.isFree(moduleId)
+      ? this._text(`data/${moduleId}-notes.md`)
+      : this._fetchContent(moduleId, "notes");
+  },
+  getSummary(moduleId) {
+    return this.isFree(moduleId)
+      ? this._text(`data/${moduleId}-summary.md`)
+      : this._fetchContent(moduleId, "summary");
+  },
+
+  /* Course-wide markdown that belongs to no single module (currently the
+     graded-questions page). Teaching content, so it sits with the notes on the
+     open side of the split, not behind the Worker. */
+  getDoc(name) { return this._text(`data/${name}.md`); },
+
+  /* The whole module key straight off disk. Shipped only for the free module (and
+     for every module in local development), which is why isFree gates it. */
+  _localAnswers(moduleId) { return this._json(`data/${moduleId}-answers.json`); },
+
+  async fetchKeys(qids) {
+    const data = await this._post("/keys", { ids: qids });
+    return data.keys || {};
+  },
+
+  async getWritten(moduleId, itemId, kind) {
+    if (this.isFree(moduleId)) {
+      const answers = await this._localAnswers(moduleId);
+      return answers[kind][itemId];
+    }
+    const data = await this._post("/written", { module: moduleId, itemId, kind });
+    return data.key;
+  },
+};
+
+/* ---------- the MCQ key store ----------
+ *
+ * Keyed by *qualified* id ("ch03:A1"), because a bare "A1" only identifies a
+ * question inside its own module and the exam mixes twelve of them.
+ *
+ * `ensure` is the only thing here that touches the network; everything that draws
+ * a screen uses the synchronous `get`. That split is what keeps the quiz feeling
+ * instant while the key arrives one small batch at a time. */
+const Keys = {
+  _by: {},
+  _inflight: {},
+
+  MAX_PER_REQUEST: 64,   // the Worker rejects more than 64 *distinct* ids
+                         // (it de-duplicates first); one exam paper is 48
+
+  storeKey: "lhs-keys",
+  MAX_STORED: 400,       // ~216 MCQ plus room for a couple of exam papers
+
+  has(qid) { return Object.prototype.hasOwnProperty.call(this._by, qid); },
+  get(qid) { return this._by[qid]; },
+  clear() {
+    this._by = {};
+    this._inflight = {};
+    try { localStorage.removeItem(this.storeKey); } catch {}
+  },
+
+  /* The cache outlives the page. Held only in memory, a reload re-spent budget on
+     questions the student had already been served — three passes through a module
+     is 54 keys against an hourly 250, and being throttled for pressing refresh is
+     a bill the honest buyer pays for a defence aimed at someone else. Nothing new
+     is exposed: these are the keys this account already fetched, watermarked to it,
+     and `clear()` (logout, or a lost device slot) drops them. Scoped to the signed-in
+     address so a shared computer never serves one account the other's answers. */
+  _persist() {
+    if (Api.mode === "local") return;
+    const account = Api.account;
+    if (!account || !account.email) return;
+    try {
+      const entries = Object.entries(this._by).slice(-this.MAX_STORED);
+      localStorage.setItem(this.storeKey, JSON.stringify({
+        email: account.email, keys: Object.fromEntries(entries),
+      }));
+    } catch {
+      // Quota, or storage disabled. The cache is an optimisation, never state —
+      // losing it costs a request, not an answer.
+    }
+  },
+
+  restore() {
+    if (Api.mode === "local") return;
+    const account = Api.account;
+    try {
+      const saved = JSON.parse(localStorage.getItem(this.storeKey) || "null");
+      if (saved && account && saved.email === account.email) this._by = saved.keys || {};
+      else localStorage.removeItem(this.storeKey);
+    } catch {
+      try { localStorage.removeItem(this.storeKey); } catch {}
+    }
+  },
+
+  async ensure(qids) {
+    const missing = [...new Set(qids)].filter(id => !this.has(id));
+    if (!missing.length) return;
+
+    /* The free module's key ships with the site, so it is read off disk and
+       costs no budget and no token — that is what makes the free module work for
+       someone who has never signed in. In local development every module takes
+       this path. The exam mixes both, hence the split rather than a branch on
+       the whole request. */
+    const free = missing.filter(id => Api.isFree(id.split(":")[0]));
+    if (free.length) {
+      const byModule = {};
+      free.forEach(qid => {
+        const [modId, localId] = qid.split(":");
+        (byModule[modId] = byModule[modId] || []).push(localId);
+      });
+      await Promise.all(Object.entries(byModule).map(async ([modId, ids]) => {
+        const answers = await Api._localAnswers(modId);
+        ids.forEach(localId => { this._by[`${modId}:${localId}`] = answers.mcq[localId]; });
+      }));
+    }
+
+    const paid = missing.filter(id => !Api.isFree(id.split(":")[0]));
+    if (!paid.length) return;
+    return this._fetchPaid(paid);
+  },
+
+  async _fetchPaid(missing) {
+    // Two screens can want overlapping questions at once — a prefetch racing the
+    // click that needed the key. Sharing the in-flight promise keeps that to one
+    // request, which matters when every id costs budget.
+    const waiting = [...new Set(missing.filter(id => this._inflight[id]).map(id => this._inflight[id]))];
+    const fresh = missing.filter(id => !this._inflight[id]);
+
+    const batches = [];
+    for (let i = 0; i < fresh.length; i += this.MAX_PER_REQUEST) {
+      const slice = fresh.slice(i, i + this.MAX_PER_REQUEST);
+      const p = Api.fetchKeys(slice)
+        .then(keys => { Object.assign(this._by, keys); this._persist(); })
+        .finally(() => slice.forEach(id => delete this._inflight[id]));
+      slice.forEach(id => { this._inflight[id] = p; });
+      batches.push(p);
+    }
+    await Promise.all([...batches, ...waiting]);
+  },
+
+  /* Fire-and-forget warm-up for the questions just ahead. A failure here is not
+     the student's problem — whatever they actually open asks again and surfaces
+     the error properly then. */
+  prefetch(qids) {
+    if (qids.length) this.ensure(qids).catch(() => {});
+  },
+};
+
+/* Before the first screen asks for anything. Api.account comes out of
+   localStorage, so the owner of the cache is known this early. */
+Keys.restore();

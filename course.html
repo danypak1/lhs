@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LHS Study Guide — Interactive</title>
+  <!-- ?v= is a cache buster. BUMP IT on every deploy, or returning students keep the
+       old JS/CSS and newly published modules stay invisible to them. -->
+  <link rel="stylesheet" href="styles.css?v=25">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧬</text></svg>">
+</head>
+<body>
+  <!-- Mobile only (<900px). On desktop the sidebar is always visible and this bar
+       is display:none, so the same nav markup serves both layouts. -->
+  <header class="topbar">
+    <button class="icon-btn" id="nav-toggle" aria-label="Open module list"
+            aria-expanded="false" aria-controls="sidebar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <a class="topbar-title" id="topbar-title" href="#/">LHS Study Guide</a>
+    <a class="topbar-ring" id="topbar-ring" href="#/" title="Course progress"><span></span></a>
+  </header>
+  <div class="scrim" id="scrim" hidden></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Modules">
+      <a class="brand" href="#/">
+        <span class="brand-icon">🧬</span>
+        <span>
+          <strong>LHS Study Guide</strong>
+          <small>Life &amp; Health Science</small>
+        </span>
+      </a>
+      <div id="course-progress" class="course-progress"></div>
+      <nav id="module-nav"></nav>
+      <button class="theme-toggle" id="theme-toggle">
+        <span class="theme-ico" id="theme-ico" aria-hidden="true">◐</span>
+        <span id="theme-label">System theme</span>
+      </button>
+      <div class="sidebar-foot">
+        <a href="index.html">About the course</a> · what a key unlocks and what it costs.<br>
+        Independent study guide. Adapted from OpenStax Biology 2e (CC BY 4.0). Not affiliated with any university.
+      </div>
+    </aside>
+    <main class="main" id="main"></main>
+  </div>
+  <script src="md.js?v=25"></script>
+  <script src="api.js?v=25"></script>
+  <script src="app.js?v=25"></script>
+</body>
+</html>

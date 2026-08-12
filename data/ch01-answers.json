@@ -1,0 +1,407 @@
+{
+  "_note": "PROTOTYPE ONLY. In production this file is never shipped to the client — it lives behind the auth API (Cloudflare Worker) and is served per-question to logged-in students.",
+  "mcq": {
+    "A1": {
+      "answer": "a",
+      "review": "1.1",
+      "explanation": "Muscle growth is a measurable property of the natural world — you can weigh, scan and compare it under controlled conditions. Science answers questions about the **objective and measurable**.",
+      "diagnostics": {
+        "b": "Morality is a question of values — there is nothing objective to measure, so science cannot rule on it. This is the boundary the section draws.",
+        "c": "Beauty is an aesthetic judgment, not a measurable property. Science can measure *responses* to music, but not which music *is* more beautiful.",
+        "d": "Souls are not observable or measurable, so the question lies outside science's reach — like religion and values generally."
+      }
+    },
+    "A2": {
+      "answer": "a",
+      "review": "1.2",
+      "explanation": "It is a tentative, testable **explanation** for the observation — which is exactly the definition of a hypothesis. It proposes a cause: too little water.",
+      "diagnostics": {
+        "b": "A prediction is an if/then consequence (\"if I water it, then it will recover\"). This statement explains rather than forecasts.",
+        "c": "The observation is the wilting itself. The statement goes further — it proposes *why* the plant is wilting.",
+        "d": "A conclusion comes after an experiment, once the data are in. Nothing has been tested yet."
+      }
+    },
+    "A3": {
+      "answer": "a",
+      "review": "1.2",
+      "explanation": "A prediction is an **if/then** statement derived from the hypothesis: *if* the cable is the problem, *then* swapping cables should fix charging. It gives you something observable to test.",
+      "diagnostics": {
+        "b": "That is a different observation or a fragment of a rival explanation, not a consequence derived from the cable hypothesis.",
+        "c": "That is a *second hypothesis* — an alternative explanation, not a prediction from the first one.",
+        "d": "That is background knowledge. It might make the hypothesis plausible, but it doesn't tell you what should happen in a test."
+      }
+    },
+    "A4": {
+      "answer": "a",
+      "review": "1.2",
+      "explanation": "The prediction was that the coffeemaker would *also fail* in a faulty outlet. It worked, so the outlet is fine: the hypothesis is **rejected**, and the method loops back to a new hypothesis (the fault is in the toaster itself).",
+      "diagnostics": {
+        "b": "The experiment worked perfectly — it delivered a clear answer. A rejected hypothesis is not a failed experiment; it's the method doing its job.",
+        "c": "Supported would mean the prediction came true — but the prediction (coffeemaker fails) was contradicted by the result.",
+        "d": "Discarding data that contradict your hypothesis is exactly the bias this chapter warns against. Data judge the hypothesis, never the reverse."
+      }
+    },
+    "A5": {
+      "answer": "d",
+      "review": "1.3",
+      "explanation": "When two variables differ at once and the groups end up different, you cannot tell which variable caused it. That second, uncontrolled variable is a **confound** — the reason for principle 1: test only ONE variable at a time.",
+      "diagnostics": {
+        "a": "A control group is the *solution*, not the problem — it holds other variables constant.",
+        "b": "Sample size is about how many subjects you have, not how many variables you change.",
+        "c": "The placebo effect is a specific confound (belief in treatment); testing multiple variables is the general problem of confounding, whatever the variables are."
+      }
+    },
+    "A6": {
+      "answer": "c",
+      "review": "1.3",
+      "explanation": "People who believe they are being treated often improve from belief alone. Giving the control group an identical-looking fake pill makes belief **equal in both groups**, so the drug's active ingredient is the only remaining difference.",
+      "diagnostics": {
+        "a": "A placebo contains **no active ingredient** — by definition it cannot deliver the drug's benefit.",
+        "b": "The placebo doesn't add subjects; it changes what the existing control subjects receive.",
+        "d": "It does the opposite — it *removes* a second variable (belief), keeping the experiment down to one tested variable."
+      }
+    },
+    "A7": {
+      "answer": "d",
+      "review": "1.3",
+      "explanation": "Two things differ between the groups: the supplement AND caffeine intake. If Group 1 sleeps better, you cannot say whether the supplement helped or the caffeine avoidance did. That second difference is a **confound** — principle 1 violated.",
+      "diagnostics": {
+        "a": "There is no such thing as a sample too large to interpret — larger samples are better. Size isn't the issue here.",
+        "b": "The wording of the prediction has nothing to do with the design flaw — the groups differ in two variables, which no rewording fixes.",
+        "c": "There is an experimental group (Group 1, receiving the supplement). What's broken is the comparison, not the existence of groups."
+      }
+    },
+    "A8": {
+      "answer": "a",
+      "review": "1.3",
+      "explanation": "Virus type and timing of exposure are variables. Making them identical for everyone **controls** them, so they cannot act as confounds — leaving echinacea as the only difference between groups.",
+      "diagnostics": {
+        "b": "The placebo effect concerns subjects' belief in treatment — that was handled by the placebo tablets, not by the shared virus.",
+        "c": "It's the opposite: making the virus identical *removes* a variable rather than adding one.",
+        "d": "Peer review happens when the finished study is evaluated by other scientists before publication — it's not part of the experimental setup."
+      }
+    },
+    "A9": {
+      "answer": "d",
+      "review": "1.3",
+      "explanation": "Catching, cutting and gluing might themselves affect a bird's mating success. A group that experienced all the handling but kept its original tail length isolates **tail length** as the one tested variable.",
+      "diagnostics": {
+        "a": "The lengthened-tail group served that purpose; the cut-and-reglue group kept length *unchanged* on purpose.",
+        "b": "Preference for short tails was tested by the shortened-tail group, not by the group restored to normal length.",
+        "c": "It's a **control** group — it differs from the experimental groups only in not having its tail length altered."
+      }
+    },
+    "A10": {
+      "answer": "d",
+      "review": "1.5",
+      "explanation": "In science, a theory is a broad explanation for a wide range of phenomena, supported by a **large body of repeated, independent evidence** — the strongest statement science makes. The everyday meaning of \"theory\" (a guess) is a different word in all but spelling.",
+      "diagnostics": {
+        "a": "Evolution long ago passed the hypothesis stage — it is supported by an enormous evidence base across many fields, which is precisely what makes it a theory.",
+        "b": "Evolution has been tested extensively — in the fossil record, genetics, and even directly observed in bacteria and insects.",
+        "c": "Overshoots in the other direction: theories are never absolutely proven. Science keeps every conclusion open to revision — that openness is a strength."
+      }
+    },
+    "A11": {
+      "answer": "b",
+      "review": "1.5",
+      "explanation": "Cataloguing genes with no practical aim is knowledge for its own sake — **basic science**. Using that knowledge to build an antibiotic solves a specific practical problem — **applied science**. The pairing also shows why applied science depends on basic science.",
+      "diagnostics": {
+        "a": "Backwards — the goal-free cataloguing is basic, the problem-solving antibiotic work is applied.",
+        "c": "Nothing here is pseudoscientific — both projects use testable methods. Pseudoscience means incompatibility with the scientific method, not absence of a practical goal.",
+        "d": "The antibiotic project follows the scientific method toward a practical goal — the definition of applied science, not pseudoscience."
+      }
+    },
+    "A12": {
+      "answer": "b",
+      "review": "1.6",
+      "explanation": "Airborne's \"rigorous clinical study\" **never existed** — the claim was invented to sell the product. It is the chapter's textbook case of a financially motivated false claim, exposed only by a class-action lawsuit.",
+      "diagnostics": {
+        "a": "The placebo effect is a real psychological response in trial subjects. Airborne's problem was more basic: the cited study was fictional.",
+        "c": "There was nothing to peer review — no study was ever done. And the correction came from a lawsuit, not from science's own filters.",
+        "d": "A small sample would at least mean a study happened. Here the sample size was zero — the study was fabricated."
+      }
+    },
+    "A13": {
+      "answer": "b",
+      "review": "1.6",
+      "explanation": "Wakefield **fabricated** the MMR-autism data — he had patented a rival vaccine and was paid by parents seeking to sue. The paper was retracted and he lost his licence, yet vaccine fear persists and once-eradicated diseases have returned. A debunked fraud can keep doing damage indefinitely.",
+      "diagnostics": {
+        "a": "The data were not real — they were made up entirely. This wasn't an underpowered study; it was fraud.",
+        "c": "No later study has found any link between MMR vaccination and autism — the claim failed every attempt at replication.",
+        "d": "It *was* published in 1998, which is what gave it credibility; the full retraction came later, after the fraud emerged."
+      }
+    },
+    "A14": {
+      "answer": "c",
+      "review": "1.4",
+      "explanation": "Repeatability is the arbiter: when a few small studies conflict with the vast majority of larger, better-controlled ones, **go with the majority**. Small studies are vulnerable to chance and hidden flaws — the lone alarming result is most likely an outlier.",
+      "diagnostics": {
+        "a": "Being first confers no authority — the 2005 \"epilepsy drug cures AIDS\" study came first and was wrong.",
+        "b": "\"To be safe\" is a policy instinct, not an evidential conclusion — and acting on outliers means being misled constantly.",
+        "d": "Averaging treats all studies as equally reliable. They aren't: larger, better-controlled studies deserve far more weight."
+      }
+    },
+    "A15": {
+      "answer": "c",
+      "review": "1.7",
+      "explanation": "Life requires **all** the characteristics, not a subset. The crystal grows and is organised, but it has no metabolism, no homeostasis, no DNA-guided development, no reproduction with heredity, and no evolution — so it fails the test.",
+      "diagnostics": {
+        "a": "Size is not a characteristic of life — bacteria are microscopic and fully alive.",
+        "b": "They *are* characteristics of life — the point is that having some of the list is not enough.",
+        "d": "Movement isn't on the list at all — plants barely move and are alive; wind-blown dust moves and is not."
+      }
+    },
+    "A16": {
+      "answer": "b",
+      "review": "1.7",
+      "explanation": "Evolution is a change in the **genetic make-up of a population over multiple generations**. It is a population-level, multi-generation process.",
+      "diagnostics": {
+        "a": "Individuals never evolve — an organism's genes don't change with the environment during its life. Populations evolve across generations.",
+        "c": "Reproduction (and evolution) operate at the species/population level — not every individual must reproduce, as sterile workers and mules show.",
+        "d": "Evolution occurs in all living populations — bacteria just show it faster because their generations are shorter."
+      }
+    },
+    "A17": {
+      "answer": "b",
+      "review": "1.8",
+      "explanation": "All the **populations of every species** living in one area form a **community**. Frogs alone would be a population; add the fish, insects, plants and bacteria and you have the community.",
+      "diagnostics": {
+        "a": "A population is all the individuals of **one** species — the frogs by themselves. The question includes many species.",
+        "c": "An ecosystem adds the **nonliving environment** — the water, mud, sunlight. The question lists only living things.",
+        "d": "The biosphere is every ecosystem on Earth — vastly bigger than one pond."
+      }
+    },
+    "A18": {
+      "answer": "c",
+      "review": "1.9",
+      "explanation": "**Eukarya** is the domain of eukaryotic cells — cells that keep their DNA in a membrane-bound nucleus. Protists, fungi, plants and animals (including you) all belong to it.",
+      "diagnostics": {
+        "a": "Bacteria are prokaryotes — their cells have **no** nucleus.",
+        "b": "Archaea are also prokaryotes — chemically distinct from bacteria, but equally nucleus-free.",
+        "d": "That names exactly the two domains **without** nuclei — the reverse of what was asked."
+      }
+    }
+  },
+  "short": {
+    "B1": {
+      "review": "1.1",
+      "model": "Science answers questions about the **natural world** — the objective, measurable world around us. It cannot answer questions about immeasurable things: morals, values, religion, ethics, art. Whether graffiti is *wrong* is a value judgment, so no experiment can settle it. A scientific version must ask something measurable, e.g.: \"Does the presence of graffiti in a neighbourhood change reported crime rates?\" or \"Does graffiti paint damage brickwork?\" — questions with observable, quantifiable answers.",
+      "marks": [
+        "Science = the objective, measurable natural world",
+        "Moral/value questions are immeasurable, hence outside science",
+        "A rewritten, genuinely measurable question about graffiti"
+      ]
+    },
+    "B2": {
+      "review": "1.2",
+      "model": "**Observation:** my desk lamp won't turn on. **Hypothesis** (a testable explanation): the bulb has burnt out. **Prediction** (if/then): *if* the bulb is burnt out, *then* the lamp will work when I fit a new bulb. **Experiment:** replace the bulb with a new one and switch the lamp on, changing nothing else. If the lamp lights, the hypothesis is supported; if not, it is rejected and I form a new hypothesis (e.g. the outlet is dead — testable by plugging in another device).",
+      "marks": [
+        "Hypothesis is an explanation and is testable",
+        "Prediction in if/then form, derived from the hypothesis",
+        "Experiment tests the prediction and both outcomes are interpreted"
+      ]
+    },
+    "B3": {
+      "review": "1.3",
+      "model": "**Principle 1 — test only ONE variable at a time.** A variable is any changeable characteristic of an experiment. If more than one variable differs between groups, the result cannot be attributed to either — the extra variable is a confound. **Principle 2 — use controls to keep all other variables the same between groups.** The control group is treated identically to the experimental group except for the single tested variable, which eliminates confounds and makes the comparison meaningful. (This is the lecture's announced 10-point question.)",
+      "marks": [
+        "One variable at a time, with the confound rationale",
+        "Controls keep everything else identical between groups",
+        "Both principles briefly *explained*, not merely named"
+      ]
+    },
+    "B4": {
+      "review": "1.3",
+      "model": "A **placebo** is a fake pill or substance containing **no active ingredient**. If the control group received nothing, the groups would differ in two ways: the drug itself AND the belief of being treated. Belief alone can produce improvement (the placebo effect), so it would be a **confound** — you couldn't tell whether the drug or the belief caused any difference. Giving the control group an identical-looking placebo equalises belief across groups, leaving the active ingredient as the only difference.",
+      "marks": [
+        "Placebo defined: fake substance, no active ingredient",
+        "Belief in treatment identified as a potential confound",
+        "Placebo equalises belief so only the drug differs between groups"
+      ]
+    },
+    "B5": {
+      "review": "1.4",
+      "model": "It shows that **once is not enough**. Small studies are vulnerable to chance, small samples and hidden flaws, so a single exciting result — an epilepsy drug appearing to cure AIDS — can easily be wrong. Only when experiments are **repeated**, ideally at larger scale and with better controls, do conclusions become trustworthy; the huge 2008 study overturned the small 2005 one. The practical rules: withhold judgment until results are replicated, and when studies conflict, go with the majority of well-controlled evidence rather than a lone outlier.",
+      "marks": [
+        "Small studies are unreliable (chance, sample size, flaws)",
+        "Repetition — especially larger, better-controlled — validates or overturns",
+        "Rule stated: trust replicated majorities, not single studies"
+      ]
+    },
+    "B6": {
+      "review": "1.5",
+      "model": "A **hypothesis** is a tentative, testable explanation for a **single observation** — proposed before or during testing, with little evidence behind it yet. A **scientific theory** is a broad explanation for a **wide range of phenomena**, supported by a **large body of repeated, independent evidence** — e.g. cell theory, germ theory, the theory of evolution. \"Just a theory\" borrows the everyday meaning of theory (a guess) and applies it to the scientific meaning, which is nearly the opposite: a theory is the strongest, best-supported kind of explanation science produces — while still remaining open to revision if extraordinary new evidence appears.",
+      "marks": [
+        "Hypothesis: tentative, testable, one observation",
+        "Theory: broad scope + large body of repeated evidence, with an example",
+        "The everyday/scientific meaning clash explained"
+      ]
+    },
+    "B7": {
+      "review": "1.7",
+      "model": "Reproduction as a characteristic of life applies at the **species level, not the individual level**. What life requires is the transmission of DNA from generation to generation — and for honeybees, the queen and drones do exactly that. An individual worker's sterility no more disqualifies it from being alive than childlessness disqualifies a human. The worker still shows every other characteristic — organisation, energy use, homeostasis, growth and development — and belongs to a reproducing, evolving species.",
+      "marks": [
+        "Reproduction is a species-level criterion",
+        "DNA transmission happens via the queen/drones of the species",
+        "Individual sterility does not affect living status (parallel example acceptable)"
+      ]
+    },
+    "B8": {
+      "review": "1.8",
+      "model": "Order: **cell → tissue → organ → organism → population → community → ecosystem**. Definitions of the three largest: a **population** is all the individuals of one species in an area; a **community** is all the populations of every species in that area; an **ecosystem** is the community plus the **nonliving environment** (water, soil, air, sunlight). The smallest unit of life is the **cell** — atoms and molecules are chemistry, not life, which is why a single-celled bacterium is alive but a DNA molecule is not.",
+      "marks": [
+        "Correct full ordering",
+        "Population / community / ecosystem correctly distinguished",
+        "Cell identified as the smallest unit of life"
+      ]
+    }
+  },
+  "extended": {
+    "C1": {
+      "review": "1.3",
+      "parts": {
+        "a": {
+          "model": "**Hypothesis:** VitaShield reduces the likelihood (or severity/duration) of catching the common cold. **Prediction:** *if* the hypothesis is true, *then* volunteers taking VitaShield will develop fewer (or shorter, milder) colds than volunteers taking a placebo under identical conditions. Both are testable and stated before the experiment.",
+          "marks": [
+            "A testable hypothesis about VitaShield and colds",
+            "An if/then prediction comparing treated vs untreated outcomes"
+          ]
+        },
+        "b": {
+          "model": "Randomly divide the 400 volunteers into two groups of 200. The **experimental group** takes one VitaShield tablet daily; the **control group** takes one identical-looking **placebo** tablet daily on the same schedule. Everything else — diet guidance, monitoring, duration, virus exposure if it is a challenge trial — is identical for both groups. (Following the echinacea design, extra groups could separate before-exposure and after-exposure dosing, but the essential contrast is treatment vs placebo.)",
+          "marks": [
+            "Random division into comparable groups",
+            "Experimental = VitaShield, control = placebo, otherwise identical treatment",
+            "Named both groups correctly"
+          ]
+        },
+        "c": {
+          "model": "Variables to control include: **exposure to cold viruses** (same virus, same timing — otherwise one group may simply meet fewer viruses); **dosing schedule and appearance of tablets** (otherwise belief and routine differ); **monitoring** (same doctors, same criteria, same five-day-style window — otherwise symptoms are judged inconsistently); also age/health distribution via randomisation, season, and general lifestyle guidance. If any of these differed systematically between groups, it would be a **confound** — a second variable that could explain the result, making it impossible to credit or acquit VitaShield.",
+          "marks": [
+            "Three or more sensible controlled variables",
+            "Each linked to the confound it would otherwise create",
+            "Explicit use of the confound concept"
+          ]
+        },
+        "d": {
+          "model": "**Randomisation** assigns volunteers to groups by chance, so the groups start out equivalent — it protects against systematic starting differences (e.g. all the healthy people choosing the supplement group). The **placebo** protects against the placebo effect: belief in being treated can itself improve outcomes, so both groups must believe equally. **Blinding** keeps subjects (and, in double-blind form, the assessing researchers) ignorant of group assignments — protecting against subjects reporting and researchers recording symptoms differently when they know who got the real tablet. Together they enforce the two principles: one variable tested, everything else equal.",
+          "marks": [
+            "Randomisation → equivalent groups at the start",
+            "Placebo → equalises belief/placebo effect",
+            "Blinding → prevents subject and assessor bias"
+          ]
+        }
+      }
+    },
+    "C2": {
+      "review": "1.6",
+      "parts": {
+        "a": {
+          "model": "**Pseudoscience** = practices that claim to be factual but are **incompatible with the scientific method**. Warning signs here: (1) \"rebalancing your body's energy field\" is an unmeasurable, untestable claim — no experiment could disprove it; (2) \"doctors don't want you to know\" is a conspiracy framing that explains away the absence of scientific support instead of providing evidence; (3) a suspiciously precise \"70% fewer illnesses\" attached to no named, checkable study. Any two suffice.",
+          "marks": [
+            "Correct definition of pseudoscience",
+            "Two advert features identified and tied to untestability or evasion of the method"
+          ]
+        },
+        "b": {
+          "model": "Ask: **Does the study actually exist, and where was it published — in a peer-reviewed journal?** **How was it designed** — was there a control group wearing an identical dummy bracelet (placebo), was assignment randomised, was it blinded, and what was the sample size? **Has it been repeated** — have independent researchers replicated the result? (Also acceptable: who funded it; how \"illness\" was measured.) A claim that fails these questions deserves no trust.",
+          "marks": [
+            "Existence/peer-review of the study questioned",
+            "Design questions: control/placebo, randomisation, blinding, sample size",
+            "Independent replication demanded"
+          ]
+        },
+        "c": {
+          "model": "A financial motive means the claimant profits whether or not the claim is true, which historically has produced outright fabrication. **Airborne** claimed a \"rigorous clinical study\" showed immune-boosting; a class-action **lawsuit** revealed no study had ever been done, and the claim had to be removed. (Or **Wakefield**: he faked MMR-autism data while holding a patent on a rival vaccine and taking money from parents preparing lawsuits; journalistic and medical investigation exposed him, the paper was retracted and he lost his licence.) In both cases the money flowed as long as people believed — so belief, not truth, was the product being sold.",
+          "marks": [
+            "Financial motive → incentive to fabricate, independent of truth",
+            "One case accurately described (Airborne/lawsuit or Wakefield/patent+payments)",
+            "How the fraud was exposed in the chosen case"
+          ]
+        },
+        "d": {
+          "model": "**Sensationalism** spreads such claims because dramatic, alarming or miraculous stories attract clicks and shares — reporters may exaggerate deliberately or simply lack the knowledge to report accurately, and a bracelet that \"prevents 70% of illness\" is a perfect headline. The **Wakefield case** shows the long tail of harm: although the paper was fully retracted and the fraud exposed, the fear it created still persuades some parents not to vaccinate, and once-nearly-eradicated diseases — measles, mumps, rubella, whooping cough — have returned, causing deaths and birth defects decades after the debunking. A claim can be scientifically dead and socially very much alive.",
+          "marks": [
+            "Sensationalism defined and linked to how claims spread",
+            "Wakefield aftermath: retraction did not stop vaccine refusal",
+            "Concrete harm named (disease comeback despite debunking)"
+          ]
+        }
+      }
+    },
+    "C3": {
+      "review": "1.7",
+      "parts": {
+        "a": {
+          "model": "The six characteristics: living things are **organised** (atoms → molecules → cells); **require energy and nutrients**; **maintain homeostasis**; **grow and develop** under DNA guidance; **reproduce** (at the species level); and **evolve** (populations change genetically over generations). Scientists use a checklist because life **cannot be defined by its parts** — proteins, fats and DNA in a test tube are not alive. No single property separates living from nonliving, so the agreed test is possessing **all** the characteristics together.",
+          "marks": [
+            "All six characteristics listed",
+            "Parts-in-a-test-tube point: no simple definition possible",
+            "The ALL-required rule stated"
+          ]
+        },
+        "b": {
+          "model": "The crystal is organised and grows — but that is where the resemblance ends. It has no cells, does not consume energy and nutrients through metabolism, maintains no internal constancy against the environment, has no DNA-guided development, and its \"copies\" involve no heredity that could support evolution. Possessing only some characteristics is insufficient. **Verdict: not alive** — it is orderly chemistry, like frost patterns or salt crystals on Earth.",
+          "marks": [
+            "Credits the characteristics it does show (organisation, growth)",
+            "Identifies the several it lacks (metabolism, homeostasis, heredity/evolution, cells)",
+            "Correct verdict via the all-required rule"
+          ]
+        },
+        "c": {
+          "model": "The capsule has organised parts (protein + nucleic acid) and, since it multiplies with nucleic-acid heredity, its populations could evolve. But it **cannot reproduce on its own** — only inside host cells — it has no metabolism of its own, maintains no homeostasis, and does not grow or develop. **Verdict: most biologists would not count it as fully alive.** It matches Earth's **viruses**, the classic borderline case that sits between chemistry and life precisely because it fails the \"all characteristics\" test while passing some.",
+          "marks": [
+            "Characteristics it shows (organisation, heredity/evolution) vs those it lacks (independent reproduction, metabolism, homeostasis)",
+            "Verdict: not fully alive / borderline, per most biologists",
+            "Identified as virus-like"
+          ]
+        },
+        "d": {
+          "model": "The organism ticks every box: it is cellular (organised), consumes chemicals (energy and nutrients), keeps a constant internal pH (homeostasis), divides (reproduction — and division implies growth), and its populations change genetically across generations (evolution; DNA-style heredity implies guided development). **Verdict: alive.** If its single cells lack a nucleus it is a **prokaryote**, resembling Earth's domains **Bacteria** and **Archaea** — Archaea being an especially apt comparison, since many archaeans thrive in extreme, brine-like environments.",
+          "marks": [
+            "Each stated ability mapped to a characteristic of life",
+            "Verdict: alive, because all characteristics are present",
+            "No nucleus → prokaryote → Bacteria/Archaea named"
+          ]
+        }
+      }
+    },
+    "C4": {
+      "review": "1.5",
+      "parts": {
+        "a": {
+          "model": "**Observation:** mothers in the doctors' clinic died of fever far more often than in the midwives' clinic. **Hypothesis:** \"cadaverous particles\" carried on doctors' hands from autopsies cause the fever. **Prediction:** *if* that is true, *then* removing the particles — handwashing with a chlorinated solution — will reduce the deaths. **Experiment:** mandatory chlorinated handwashing was introduced and death rates were compared before and after. **Result:** deaths plummeted — the hypothesis was **supported**.",
+          "marks": [
+            "Observation and hypothesis correctly identified",
+            "Prediction in if/then form tied to handwashing",
+            "Experiment + supported conclusion"
+          ]
+        },
+        "b": {
+          "model": "At the time it was a **hypothesis** — one tentative explanation for one set of observations, supported by a single clinic's data. To become the germ **theory** of disease, the explanation had to broaden and accumulate evidence: repeated, independent confirmation by many scientists (Pasteur's and Koch's work identifying microbes as the agents), successful explanation of a **wide range** of phenomena — infection, spoilage, sterilisation, vaccination — and survival of every serious attempt to refute it. A theory is a broad explanation backed by a large body of repeated evidence, and germ theory earned that status over decades.",
+          "marks": [
+            "Then: a hypothesis (single explanation, limited evidence)",
+            "Theory requires breadth of phenomena explained + large repeated evidence base",
+            "Recognition that the transition took independent replication over time"
+          ]
+        },
+        "c": {
+          "model": "**Bias** — specifically the subconscious, self-protective kind (a cognitive bias). The colleagues did not weigh the evidence objectively; accepting it meant accepting that they themselves had been killing patients, so they processed the information selectively and rejected it. The chapter's point is that bias is usually subconscious — the doctors doubtless believed they were being rational — which is exactly why science relies on procedures (controls, blinding, peer review, replication) rather than on anyone's good intentions.",
+          "marks": [
+            "Names bias / cognitive bias",
+            "Explains the motivated, subconscious rejection of unwelcome evidence",
+            "Links to why science uses procedures to counter bias"
+          ]
+        },
+        "d": {
+          "model": "**Both.** It was **applied science** in the most direct sense: it used evidence to solve a specific practical problem — stopping deadly fever in a maternity clinic — with an immediate intervention, handwashing. But it also fed **basic science**: the underlying idea, that invisible particles transmit disease, was knowledge about how nature works, and it became a foundation stone of germ theory, from which countless later applications (antisepsis, sterilisation, vaccines, antibiotics) were built. The case illustrates the chapter's point that the two are intertwined: applied successes rest on basic understanding, and practical problems can generate fundamental knowledge.",
+          "marks": [
+            "Applied: solved a specific practical problem (definitions used)",
+            "Basic: produced general knowledge that fed germ theory",
+            "Justified 'both' with the interdependence point"
+          ]
+        }
+      }
+    }
+  }
+}

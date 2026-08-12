@@ -1,0 +1,345 @@
+{
+  "module": "ch01",
+  "title": "The Scientific Study of Life",
+  "mcqIntro": "18 questions. Pick an answer to check it instantly — a wrong pick tells you exactly what to re-read.",
+  "mcq": [
+    {
+      "id": "A1",
+      "topic": "Scientific method",
+      "stem": "Which question could science, in principle, answer?",
+      "options": {
+        "a": "Does a high-protein diet increase muscle growth in adults?",
+        "b": "Is it morally acceptable to eat animals?",
+        "c": "Is Beethoven's music more beautiful than Mozart's?",
+        "d": "Do humans have souls?"
+      }
+    },
+    {
+      "id": "A2",
+      "topic": "Scientific method",
+      "stem": "A student notices that her houseplant is wilting and proposes: \"The plant is wilting because the soil has too little water.\" In the scientific method, this statement is:",
+      "options": {
+        "a": "a hypothesis",
+        "b": "a prediction",
+        "c": "an observation",
+        "d": "a conclusion"
+      }
+    },
+    {
+      "id": "A3",
+      "topic": "Scientific method",
+      "stem": "Which statement is a *prediction* derived from the hypothesis \"My phone won't charge because the cable is broken\"?",
+      "options": {
+        "a": "If I use a different cable, then my phone will charge",
+        "b": "My phone battery is old",
+        "c": "My phone won't charge because the charging port is dirty",
+        "d": "Phone cables often break at the connector"
+      }
+    },
+    {
+      "id": "A4",
+      "topic": "Scientific method",
+      "stem": "A hypothesis states: \"Something is wrong with the electrical outlet, which is why the toaster doesn't work.\" A coffeemaker plugged into the same outlet works normally. What should happen next?",
+      "options": {
+        "a": "The hypothesis is rejected, and a new hypothesis should be formed",
+        "b": "The experiment failed and must be redesigned",
+        "c": "The hypothesis is supported, so the toaster should be plugged in again",
+        "d": "The result should be discarded because it contradicts the hypothesis"
+      }
+    },
+    {
+      "id": "A5",
+      "topic": "Experimental design",
+      "stem": "In an experiment, testing more than one variable at a time is a problem because it creates:",
+      "options": {
+        "a": "a control group",
+        "b": "a larger sample size",
+        "c": "a placebo effect",
+        "d": "a confound"
+      }
+    },
+    {
+      "id": "A6",
+      "topic": "Experimental design",
+      "stem": "In a drug trial, the control group receives a placebo instead of nothing at all. The main reason is to:",
+      "options": {
+        "a": "make sure the control group also benefits from the drug",
+        "b": "increase the total sample size of the study",
+        "c": "keep the belief of being treated equal in both groups",
+        "d": "test two variables at the same time"
+      }
+    },
+    {
+      "id": "A7",
+      "topic": "Experimental design",
+      "stem": "Researchers test a sleep supplement: Group 1 takes the supplement and is told to avoid caffeine; Group 2 takes nothing and drinks coffee as usual. Group 1 sleeps better. What is the main flaw?",
+      "options": {
+        "a": "The sample size is too large for the results to be interpreted reliably",
+        "b": "The prediction was not an if/then statement",
+        "c": "There is no experimental group",
+        "d": "Caffeine intake is a confound — two variables differ between the groups"
+      }
+    },
+    {
+      "id": "A8",
+      "topic": "Experimental design",
+      "stem": "In the echinacea cold study, all 437 volunteers were exposed to the same cold-causing virus at the same time. This design choice is an example of:",
+      "options": {
+        "a": "controlling a variable to prevent confounds",
+        "b": "the placebo effect",
+        "c": "testing several variables at once rather than one",
+        "d": "peer review"
+      }
+    },
+    {
+      "id": "A9",
+      "topic": "Experimental design",
+      "stem": "In Andersson's widowbird experiment, some males had their tails cut and glued back at the original length. The purpose of this group was to:",
+      "options": {
+        "a": "increase the number of long-tailed males in the population",
+        "b": "test whether females also prefer short tails as well as long ones",
+        "c": "serve as the experimental group",
+        "d": "separate the effect of tail length from the effect of handling the birds"
+      }
+    },
+    {
+      "id": "A10",
+      "topic": "Hypothesis vs theory",
+      "stem": "\"Evolution is just a theory, so it's basically a guess.\" The error in this statement is that:",
+      "options": {
+        "a": "evolution is actually a hypothesis, not a theory",
+        "b": "evolution has never been tested experimentally",
+        "c": "theories in science are proven facts that can never be revised, whereas evolution keeps changing",
+        "d": "a scientific theory is a broad explanation supported by a large body of repeated evidence, not a guess"
+      }
+    },
+    {
+      "id": "A11",
+      "topic": "Hypothesis vs theory",
+      "stem": "A researcher catalogues the genes of deep-sea bacteria with no practical goal in mind. Years later, another team uses that catalogue to design a new antibiotic. The first project and the second are, respectively:",
+      "options": {
+        "a": "applied science; basic science",
+        "b": "basic science; applied science",
+        "c": "pseudoscience; applied science",
+        "d": "basic science; pseudoscience"
+      }
+    },
+    {
+      "id": "A12",
+      "topic": "Evaluating claims",
+      "stem": "A supplement company claims its product \"boosts the immune system\", citing a \"rigorous clinical study\". A lawsuit later reveals no study was ever conducted. This case (Airborne) best illustrates:",
+      "options": {
+        "a": "the placebo effect",
+        "b": "a claim invented by people who want your money",
+        "c": "an honest error corrected by peer review",
+        "d": "the danger of small sample sizes"
+      }
+    },
+    {
+      "id": "A13",
+      "topic": "Evaluating claims",
+      "stem": "Andrew Wakefield's retracted MMR-autism paper is especially instructive because:",
+      "options": {
+        "a": "his data were real but his sample was too small",
+        "b": "he fabricated the data for financial gain, and the fear he created still lowers vaccination rates",
+        "c": "later studies confirmed a weak but real link between vaccines and autism in some children",
+        "d": "the paper was never actually published"
+      }
+    },
+    {
+      "id": "A14",
+      "topic": "Evaluating claims",
+      "stem": "One small study finds that a food additive causes memory loss; dozens of larger, well-controlled studies find no effect. The most scientific response is to:",
+      "options": {
+        "a": "trust the small study because it came first",
+        "b": "conclude the additive is dangerous, to be safe",
+        "c": "go with the majority of studies, treating the small one as a likely outlier",
+        "d": "average all the results together and conclude there is a moderate effect"
+      }
+    },
+    {
+      "id": "A15",
+      "topic": "Characteristics of life",
+      "stem": "A crystal in a saturated solution grows larger and has a highly organised structure, yet it is not alive. Why not?",
+      "options": {
+        "a": "It is too small to be alive",
+        "b": "Growth and organisation are not characteristics of life",
+        "c": "A thing must show ALL the characteristics of life, and the crystal lacks most of them",
+        "d": "It does not move on its own, and movement is the key characteristic of life"
+      }
+    },
+    {
+      "id": "A16",
+      "topic": "Characteristics of life",
+      "stem": "Which statement about evolution as a characteristic of life is correct?",
+      "options": {
+        "a": "An individual organism evolves during its lifetime if the environment changes",
+        "b": "Evolution is a change in the genetic make-up of a population over multiple generations",
+        "c": "Evolution requires that every individual reproduces",
+        "d": "Evolution happens only in bacteria, not in animals"
+      }
+    },
+    {
+      "id": "A17",
+      "topic": "Organization & taxonomy",
+      "stem": "All the frogs in a pond, plus the fish, insects, plants and bacteria living there, together form a:",
+      "options": {
+        "a": "population",
+        "b": "community",
+        "c": "ecosystem",
+        "d": "biosphere"
+      }
+    },
+    {
+      "id": "A18",
+      "topic": "Organization & taxonomy",
+      "stem": "Which domain contains organisms whose cells have a nucleus?",
+      "options": {
+        "a": "Bacteria",
+        "b": "Archaea",
+        "c": "Eukarya",
+        "d": "Both Bacteria and Archaea"
+      }
+    }
+  ],
+  "short": [
+    {
+      "id": "B1",
+      "topic": "Scientific method",
+      "prompt": "A friend claims: \"Science has proven that graffiti is wrong.\" Explain what kinds of questions science can and cannot answer, and rewrite your friend's topic as a question science *could* investigate."
+    },
+    {
+      "id": "B2",
+      "topic": "Scientific method",
+      "prompt": "Using the observation \"my desk lamp won't turn on\", write a hypothesis and one if/then prediction derived from it, then describe an experiment that would test the prediction. Label each part."
+    },
+    {
+      "id": "B3",
+      "topic": "Experimental design",
+      "prompt": "State and briefly explain the two principles that should guide the setup of any experiment."
+    },
+    {
+      "id": "B4",
+      "topic": "Experimental design",
+      "prompt": "Define *placebo* and explain, using the idea of confounds, why a control group in a drug trial receives a placebo rather than nothing."
+    },
+    {
+      "id": "B5",
+      "topic": "Evaluating claims",
+      "prompt": "In 2005 a small study suggested an epilepsy drug might cure AIDS; a much larger 2008 study found it did not work. Explain what this episode shows about repeatability and sample size in science."
+    },
+    {
+      "id": "B6",
+      "topic": "Hypothesis vs theory",
+      "prompt": "Distinguish a hypothesis from a scientific theory in terms of scope and evidence, and explain why the phrase \"just a theory\" misrepresents how the word is used in science."
+    },
+    {
+      "id": "B7",
+      "topic": "Characteristics of life",
+      "prompt": "A worker honeybee never reproduces, yet it is unquestionably alive. Explain how this is consistent with reproduction being a characteristic of life."
+    },
+    {
+      "id": "B8",
+      "topic": "Organization & taxonomy",
+      "prompt": "Place these in order from smallest to largest and define the three largest: organ, cell, ecosystem, tissue, population, organism, community. Then state which level is the smallest unit of life."
+    }
+  ],
+  "extended": [
+    {
+      "id": "C1",
+      "topic": "Experimental design",
+      "title": "Designing a supplement trial",
+      "intro": "A company claims its new herbal tablet, VitaShield, prevents the common cold. You are asked to design a rigorous experiment to test the claim, with 400 volunteers available.",
+      "parts": [
+        {
+          "id": "a",
+          "prompt": "Write a testable hypothesis and an if/then prediction for the trial."
+        },
+        {
+          "id": "b",
+          "prompt": "Describe how you would divide the volunteers into groups, and what each group would receive. Name the experimental and control groups."
+        },
+        {
+          "id": "c",
+          "prompt": "Identify at least three variables that must be controlled (kept the same across groups) and explain what would go wrong if they were not."
+        },
+        {
+          "id": "d",
+          "prompt": "Explain why you would use randomisation, a placebo, and blinding, and what each one protects the experiment against."
+        }
+      ]
+    },
+    {
+      "id": "C2",
+      "topic": "Evaluating claims",
+      "title": "Evaluating a miracle product",
+      "intro": "An online advert says: \"DetoxPure bracelets rebalance your body's energy field. A clinical study proves wearers get 70% fewer illnesses. Doctors don't want you to know!\"",
+      "parts": [
+        {
+          "id": "a",
+          "prompt": "Define pseudoscience and identify two features of this advert that suggest the claim is pseudoscientific."
+        },
+        {
+          "id": "b",
+          "prompt": "List three specific questions you would ask about the cited \"clinical study\" before trusting it."
+        },
+        {
+          "id": "c",
+          "prompt": "Using the Airborne or Wakefield case, explain why a financial motive should increase your scepticism, and what eventually exposed the fraud in the case you chose."
+        },
+        {
+          "id": "d",
+          "prompt": "Explain the role sensationalism plays in spreading claims like this, and how the Wakefield case shows that a debunked claim can keep causing harm."
+        }
+      ]
+    },
+    {
+      "id": "C3",
+      "topic": "Characteristics of life",
+      "title": "Is it alive?",
+      "intro": "A space probe returns from Mars with three finds: (1) a self-repeating crystal lattice that grows in brine; (2) a microscopic capsule of protein and nucleic acid that multiplies only inside terrestrial cells; (3) a single-celled organism that consumes chemicals, keeps a constant internal pH, divides, and whose populations change genetically across generations.",
+      "parts": [
+        {
+          "id": "a",
+          "prompt": "List the six characteristics of life and explain why scientists use a list of characteristics rather than a simple definition."
+        },
+        {
+          "id": "b",
+          "prompt": "Evaluate the crystal (find 1) against the characteristics and give a verdict."
+        },
+        {
+          "id": "c",
+          "prompt": "Evaluate the capsule (find 2) against the characteristics, state the verdict most biologists would give, and name the Earth entity it resembles."
+        },
+        {
+          "id": "d",
+          "prompt": "Evaluate the single-celled organism (find 3), give a verdict, and state which domains of Earth life it would most resemble if its cells lack a nucleus."
+        }
+      ]
+    },
+    {
+      "id": "C4",
+      "topic": "Hypothesis vs theory",
+      "title": "From guess to germ theory",
+      "intro": "In the 1840s, Ignaz Semmelweis observed that far more mothers died of fever in a clinic staffed by doctors who came straight from autopsies than in one staffed by midwives. He proposed that \"cadaverous particles\" carried on doctors' hands caused the fever, and ordered handwashing with a chlorinated solution. Deaths plummeted. Decades later, this idea matured into the germ theory of disease.",
+      "parts": [
+        {
+          "id": "a",
+          "prompt": "Identify Semmelweis's observation, hypothesis, prediction and experiment, and state whether the hypothesis was supported."
+        },
+        {
+          "id": "b",
+          "prompt": "At the time, was Semmelweis's idea a hypothesis or a theory? Explain what had to happen for germ theory to earn the status of *theory*."
+        },
+        {
+          "id": "c",
+          "prompt": "Semmelweis's colleagues rejected his idea, partly because it implied doctors themselves were causing deaths. Which concept from this chapter does their reaction illustrate? Explain."
+        },
+        {
+          "id": "d",
+          "prompt": "Was Semmelweis's work basic science, applied science, or both? Justify your answer using the definitions of each."
+        }
+      ]
+    }
+  ]
+}
