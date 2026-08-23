@@ -110,4 +110,4 @@ Binomial name = *Genus species*, italicised, genus capitalised: ***Homo sapiens*
 
 ---
 
-*Independent study guide for Life and Health Science. Question text adapted from OpenStax Biology 2e, © Rice University, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Explanations, commentary and slide mapping are original work. Not affiliated with or endorsed by any university or instructor.*
+> *Independent study guide for Life and Health Science. Some question text is adapted from OpenStax Biology 2e, © Rice University, licensed under CC BY 4.0; where a question follows material shown in class it is paraphrased, and no lecture slide is reproduced. Explanations, commentary and mark schemes are original work. Not affiliated with or endorsed by any university or instructor.*

@@ -256,6 +256,4 @@ the form an exam is more likely to use than a bare list of properties.
 
 ---
 
-*Independent study guide for Life and Health Science. Question topics are paraphrased from
-material shown in class; no lecture slide is reproduced. Explanations and model answers are
-original work. Not affiliated with or endorsed by any university or instructor.*
+> *Independent study guide for Life and Health Science. Some question text is adapted from OpenStax Biology 2e, © Rice University, licensed under CC BY 4.0; where a question follows material shown in class it is paraphrased, and no lecture slide is reproduced. Explanations, commentary and mark schemes are original work. Not affiliated with or endorsed by any university or instructor.*

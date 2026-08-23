@@ -12,79 +12,41 @@
    giving eleven of those away is giving away most of what the key is for. */
 const MODULES = [
   { id: "ch01", num: "01", title: "The Scientific Study of Life", ready: true, sections: 13,
-    blurb: `How science actually works, and what separates the living from the non-living.
-      Builds the scientific method in order, the filters for trusting a claim, and the six
-      characteristics a thing must have <em>all</em> of to count as alive.`,
-    topics: ["The scientific method", "Controls and variables", "Hypothesis vs theory",
-             "Characteristics of life", "Levels of organisation", "Taxonomy and the domains"] },
+    blurb: `How science actually works, and what separates the living from the non-living. Builds the scientific method in order, the filters for trusting a claim, and the six characteristics a thing must have <em>all</em> of to count as alive.`,
+    topics: ["The scientific method", "Controls and variables", "Hypothesis vs theory", "Characteristics of life", "Levels of organisation", "Taxonomy and the domains"] },
   { id: "ch02", num: "02", title: "The Chemistry of Life", ready: true, sections: 17,
-    blurb: `The chemistry a biologist cannot do without: what atoms are made of, why some are
-      radioactive, the three bonds that hold biology together, and the properties of water that
-      follow from one of them.`,
-    topics: ["Atoms and isotopes", "Electron shells and reactivity", "Ionic, covalent and hydrogen bonds",
-             "The properties of water", "pH", "Why carbon"] },
+    blurb: `The chemistry a biologist cannot do without: what atoms are made of, why some are radioactive, the three bonds that hold biology together, and the properties of water that follow from one of them.`,
+    topics: ["Atoms and isotopes", "Electron shells and reactivity", "Ionic, covalent and hydrogen bonds", "The properties of water", "pH", "Why carbon"] },
   { id: "ch03", num: "03", title: "Biological Molecules", ready: true, sections: 15,
-    blurb: `The four classes of molecule life is built from, and the single pair of reactions that
-      assembles and dismantles every one of them.`,
-    topics: ["Dehydration synthesis and hydrolysis", "Carbohydrates", "Proteins and the four levels of structure",
-             "Nucleic acids", "The four groups of lipid"] },
+    blurb: `The four classes of molecule life is built from, and the single pair of reactions that assembles and dismantles every one of them.`,
+    topics: ["Dehydration synthesis and hydrolysis", "Carbohydrates", "Proteins and the four levels of structure", "Nucleic acids", "The four groups of lipid"] },
   { id: "ch04", num: "04", title: "Cell Structure", ready: true, sections: 16,
-    blurb: `What a cell is made of and why it has to stay small — cell theory and the microscopes
-      that established it, then an organelle-by-organelle tour and the differences that separate
-      the two great cell types.`,
-    topics: ["Cell theory", "Microscopy", "Surface area to volume", "Prokaryote vs eukaryote",
-             "The organelles", "The cytoskeleton", "Plant vs animal", "Cell junctions"] },
+    blurb: `What a cell is made of and why it has to stay small — cell theory and the microscopes that established it, then an organelle-by-organelle tour and the differences that separate the two great cell types.`,
+    topics: ["Cell theory", "Microscopy", "Surface area to volume", "Prokaryote vs eukaryote", "The organelles", "The cytoskeleton", "Plant vs animal", "Cell junctions"] },
   { id: "ch05", num: "05", title: "Cell Membranes", ready: true, sections: 19,
-    blurb: `How one structure manages to be sealed and open at the same time: the fluid mosaic
-      model, what makes a membrane more or less fluid, and the six mechanisms by which anything
-      gets across it.`,
-    topics: ["Selective permeability", "The fluid mosaic model", "The phospholipid bilayer",
-             "Membrane proteins", "Diffusion and osmosis", "Active transport", "Endo- and exocytosis"] },
+    blurb: `How one structure manages to be sealed and open at the same time: the fluid mosaic model, what makes a membrane more or less fluid, and the six mechanisms by which anything gets across it.`,
+    topics: ["Selective permeability", "The fluid mosaic model", "The phospholipid bilayer", "Membrane proteins", "Diffusion and osmosis", "Active transport", "Endo- and exocytosis"] },
   { id: "ch06", num: "06", title: "The Energy of Life", ready: true, sections: 21,
-    blurb: `Where a cell's energy comes from and what controls its release — the thermodynamics,
-      then ATP and enzymes, then respiration from glucose to the electron transport chain, and
-      photosynthesis running the loop backwards.`,
-    topics: ["Endergonic vs exergonic", "ATP", "Enzymes and inhibition", "Glycolysis and the citric acid cycle",
-             "Chemiosmosis and ATP yield", "Fermentation", "Photosynthesis", "C3, C4 and CAM"] },
+    blurb: `Where a cell's energy comes from and what controls its release — the thermodynamics, then ATP and enzymes, then respiration from glucose to the electron transport chain, and photosynthesis running the loop backwards.`,
+    topics: ["Endergonic vs exergonic", "ATP", "Enzymes and inhibition", "Glycolysis and the citric acid cycle", "Chemiosmosis and ATP yield", "Fermentation", "Photosynthesis", "C3, C4 and CAM"] },
   { id: "ch07", num: "07", title: "DNA Structure & Gene Function", ready: true, sections: 18,
-    blurb: `How the information in DNA becomes a working protein: the structure, the experiments
-      that revealed it, and the central dogma step by step — with what happens when a letter
-      changes.`,
-    topics: ["DNA structure", "The central dogma", "The three RNAs", "Transcription",
-             "The genetic code", "Translation", "Mutations", "Gene regulation"] },
+    blurb: `How the information in DNA becomes a working protein: the structure, the experiments that revealed it, and the central dogma step by step — with what happens when a letter changes.`,
+    topics: ["DNA structure", "The central dogma", "The three RNAs", "Transcription", "The genetic code", "Translation", "Mutations", "Gene regulation"] },
   { id: "ch08", num: "08", title: "DNA Replication & Mitosis", ready: true, sections: 18,
-    blurb: `How a cell copies three billion letters and then divides — the replication machinery
-      and the accuracy that keeps it honest, the cell cycle and mitosis, and what a failure of
-      those controls is called.`,
-    topics: ["Semiconservative replication", "Leading and lagging strands", "Proofreading and telomeres",
-             "The cell cycle", "The stages of mitosis", "Checkpoints", "Binary fission", "Cancer"] },
+    blurb: `How a cell copies three billion letters and then divides — the replication machinery and the accuracy that keeps it honest, the cell cycle and mitosis, and what a failure of those controls is called.`,
+    topics: ["Semiconservative replication", "Leading and lagging strands", "Proofreading and telomeres", "The cell cycle", "The stages of mitosis", "Checkpoints", "Binary fission", "Cancer"] },
   { id: "ch09", num: "09", title: "Sexual Reproduction & Meiosis", ready: true, sections: 16,
-    blurb: `Why sexual reproduction produces variation and asexual reproduction does not — ploidy
-      and the vocabulary that goes with it, the two divisions of meiosis, and the three places the
-      variety actually comes from.`,
-    topics: ["Asexual vs sexual", "Haploid and diploid", "Meiosis I and II", "Crossing over and independent assortment",
-             "Meiosis vs mitosis", "Gametogenesis", "Sex determination", "Nondisjunction"] },
+    blurb: `Why sexual reproduction produces variation and asexual reproduction does not — ploidy and the vocabulary that goes with it, the two divisions of meiosis, and the three places the variety actually comes from.`,
+    topics: ["Asexual vs sexual", "Haploid and diploid", "Meiosis I and II", "Crossing over and independent assortment", "Meiosis vs mitosis", "Gametogenesis", "Sex determination", "Nondisjunction"] },
   { id: "ch10", num: "10", title: "Patterns of Inheritance", ready: true, sections: 21,
-    blurb: `Mendel's two laws and everything that complicates them — crosses worked forwards with
-      squares and probability, then backwards from a ratio, then the five patterns that do not obey
-      Mendel at all.`,
-    topics: ["Mendel's two laws", "Monohybrid and dihybrid crosses", "Diagnostic ratios",
-             "Incomplete dominance and codominance", "ABO blood groups", "Sex-linked inheritance",
-             "Pedigrees", "Genetic disorders"] },
+    blurb: `Mendel's two laws and everything that complicates them — crosses worked forwards with squares and probability, then backwards from a ratio, then the five patterns that do not obey Mendel at all.`,
+    topics: ["Mendel's two laws", "Monohybrid and dihybrid crosses", "Diagnostic ratios", "Incomplete dominance and codominance", "ABO blood groups", "Sex-linked inheritance", "Pedigrees", "Genetic disorders"] },
   { id: "ch11", num: "11", title: "Cell Communication", ready: true, sections: 23,
-    blurb: `How a cell hears a signal and does something about it: reception, transduction and
-      response, why one molecule can move millions, how the message is switched off — and what
-      goes wrong when it is not.`,
-    topics: ["Forms of signalling", "Ligand solubility", "The three surface receptors",
-             "Intracellular receptors", "Kinase cascades", "Second messengers", "Amplification",
-             "Termination", "Signalling failure and drugs"] },
+    blurb: `How a cell hears a signal and does something about it: reception, transduction and response, why one molecule can move millions, how the message is switched off — and what goes wrong when it is not.`,
+    topics: ["Forms of signalling", "Ligand solubility", "The three surface receptors", "Intracellular receptors", "Kinase cascades", "Second messengers", "Amplification", "Termination", "Signalling failure and drugs"] },
   { id: "ch12", num: "12", title: "Health & Diseases", ready: true, sections: 27,
-    blurb: `What makes people ill and how the body answers — the six causes of disease, pathogens
-      from bacteria down to prions, both arms of the immune system, and the non-communicable
-      diseases that kill the most people.`,
-    topics: ["The six causes of disease", "Bacteria and their toxins", "Antibiotics and resistance",
-             "Viruses, viroids and prions", "Innate immunity", "Adaptive immunity and antibodies",
-             "Vaccination and herd immunity", "HIV/AIDS", "Cancer", "Cardiovascular disease"] },
+    blurb: `What makes people ill and how the body answers — the six causes of disease, pathogens from bacteria down to prions, both arms of the immune system, and the non-communicable diseases that kill the most people.`,
+    topics: ["The six causes of disease", "Bacteria and their toxins", "Antibiotics and resistance", "Viruses, viroids and prions", "Innate immunity", "Adaptive immunity and antibodies", "Vaccination and herd immunity", "HIV/AIDS", "Cancer", "Cardiovascular disease"] },
 ];
 
 /* Every module carries the same question set, and the locked-module page says so
