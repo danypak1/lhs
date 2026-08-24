@@ -27,6 +27,9 @@
  */
 
 const Api = {
+  /* This tree predates the namespaced storage keys, so it has no COURSE_ID
+     constant. The id is still needed to say which course a visit belongs to. */
+  courseId: "lhs",
   mode: "remote", // "local" reads ./data/ including the key — development only
   base: "https://lhs-api.danypak.workers.dev",
                   // deployed 2026-08-11 from ../worker.
@@ -207,7 +210,15 @@ const Api = {
      survive the navigation to the chat app that immediately follows it. */
   beacon(kind, surface) {
     if (this.mode !== "remote") return;
-    const once = `beacon:${COURSE_ID}:${kind}`;
+    /* Resolved defensively, and this is why: the first version of this used the
+       COURSE_ID constant directly, which the kit's api.js declares and a tree
+       written before it does not. On that tree every call threw a ReferenceError
+       — from the first line of renderModule, so every module page rendered
+       blank. A counter that can break the page it measures has cost more than it
+       will ever measure; a course with no id simply goes uncounted. */
+    const cid = this.courseId || (typeof COURSE_ID !== "undefined" ? COURSE_ID : null);
+    if (!cid) return;
+    const once = `beacon:${cid}:${kind}`;
     try {
       if (sessionStorage.getItem(once)) return;
       sessionStorage.setItem(once, "1");
@@ -216,7 +227,7 @@ const Api = {
       fetch(`${this.base}/beacon`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ course: COURSE_ID, kind, surface }),
+        body: JSON.stringify({ course: cid, kind, surface }),
         keepalive: true,
       }).catch(() => {});
     } catch { /* nothing here is worth a broken page */ }
