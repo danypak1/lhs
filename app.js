@@ -189,6 +189,9 @@ const stripMd = s => s.replace(/[*`_]/g, "").replace(/&/g, "&amp;").replace(/"/g
    announcing that a new screen existed. route() awaits the render (several are
    async) and then puts focus on the screen itself. */
 let routedOnce = false;
+/* Set by routeTo from the hash, consumed once by whichever render puts the
+   heading in the DOM. */
+let pendingAnchor = null;
 async function route() {
   const rendered = routeTo();
   const first = !routedOnce;
@@ -213,7 +216,14 @@ function routeTo() {
   beginRender();
   QuizKeys.clear();
   const hash = location.hash.replace(/^#\/?/, "");
-  const [mod, tab] = hash.split("/");
+  /* A second "#" in the hash names a heading inside the tab. This course prints
+     no such links itself — it has no problems surface — but the URL is the only
+     sensible thing to paste into a chat when answering one question, and without
+     this split the tab is the whole string "learn#sec-6-2", which matches no tab
+     and lands the reader on the quiz. */
+  const [mod, tabAndAnchor] = hash.split("/");
+  const [tab, anchor] = (tabAndAnchor || "").split("#");
+  pendingAnchor = anchor || null;
   renderNav(mod);
   // #/unlock/LHS-XXXXX-… — the link sent with the key, so the first sign-in
   // is a click rather than twenty characters typed on a phone. Decoded because
@@ -639,6 +649,13 @@ function buildToc(m, notes, tocEl) {
   const p = Store.module(m.id);
   const fill = $("#read-fill");
   let activeId = null;
+
+  /* Consume a "#sec-N-M" request here, where the headings certainly exist. */
+  if (pendingAnchor) {
+    const want = document.getElementById(pendingAnchor);
+    pendingAnchor = null;
+    if (want) want.scrollIntoView({ block: "start" });
+  }
 
   PageScroll.set(() => {
     if (!notes.isConnected) return PageScroll.clear();
