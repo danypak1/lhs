@@ -58,7 +58,7 @@ const PER_MODULE = { mcq: 18, short: 8, extended: 4 };
    module shows only a description of itself. Api.FREE_MODULES is the
    machine-readable half of this and is what the code branches on. */
 const PRICE = "$25";
-const CONTACT = "https://t.me/danypak";
+const CONTACT = "https://t.me/danypak?text=Hi%21%20I%27d%20like%20a%20key%20for%20LHS%20Study%20Guide%20%28%2425%29.";
 
 /* Sales copy lives here rather than being retyped at each call site: the lock
    card, the locked-module page and the sign-in screen all have to promise the
@@ -247,6 +247,15 @@ function routeTo() {
   renderModule(m, tab || "learn");
 }
 window.addEventListener("hashchange", route);
+
+/* Any link to the chat, wherever it is drawn — the lock screen, a trainer, the
+   help line under a failed unlock. Delegated from the document rather than bound
+   at each call site, because there are six of them and a seventh would silently
+   go uncounted. Capture phase: the click is about to leave for another app. */
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest(`a[href^="${CONTACT}"]`);
+  if (a) Api.beacon("buy_click", "locked_module");
+}, true);
 
 /* The skip link is a button, not an <a href="#main">: this app routes on the
    hash, so an anchor jump would set location.hash to "#main" and the router
@@ -517,6 +526,11 @@ function currentRender() {
 
 async function renderModule(m, tab) {
   const alive = beginRender();
+  /* Somebody is reading a module. Which one matters: opening the free chapter is
+     interest, opening a locked one is interest that has already met the price.
+     FREE_MODULES is what api.js gates on, so this asks the same question the
+     paywall does rather than a second copy of it. */
+  Api.beacon("visit", Api.isFree(m.id) ? "free_module" : "locked_module");
   document.title = `${m.title} — LHS Study Guide`;
   PageScroll.clear();
   main.innerHTML = `
