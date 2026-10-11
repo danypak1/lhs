@@ -57,8 +57,8 @@ const PER_MODULE = { mcq: 18, short: 8, extended: 4 };
    in full — notes, questions, answers, summary and mark schemes; every other
    module shows only a description of itself. Api.FREE_MODULES is the
    machine-readable half of this and is what the code branches on. */
-const PRICE = "$25";
-const CONTACT = "https://t.me/danypak?text=Hi%21%20I%27d%20like%20a%20key%20for%20LHS%20Study%20Guide%20%28%2425%29.";
+const PRICE = "$5";
+const CONTACT = "https://t.me/danypak?text=Hi%21%20I%27d%20like%20a%20key%20for%20LHS%20Study%20Guide%20%28%245%29.";
 
 /* Sales copy lives here rather than being retyped at each call site: the lock
    card, the locked-module page and the sign-in screen all have to promise the
@@ -740,7 +740,7 @@ function scrollToPending(body) {
 /* Two different people see this card, and they must not be told the same thing.
    Someone who has never bought is deciding whether to; someone whose session
    just ended has already paid, and showing them a padlock, the sales pitch and a
-   $25 button reads as "pay again" — the likeliest support message this product
+   price button reads as "pay again" — the likeliest support message this product
    can generate. The server cannot tell them apart (it returns the same 401 for an
    evicted slot as for no key at all, deliberately, so a stranger learns nothing),
    but the browser can: only a device that had a token can have lost one. */
@@ -791,7 +791,7 @@ function renderModuleTeaser(m, body, retry) {
      rejected token is cleared, which drops the reader back to "signed out", and
      this is the screen they land on for a module tab. Found by walking the path
      for real — the first version of the fix only covered renderLock, so a buyer
-     whose slot had just been taken still met "Module 07 needs a key" and a $25
+     whose slot had just been taken still met "Module 07 needs a key" and a price
      button on the chapter they had opened. */
   const hadKey = Api.everSignedIn;
   body.innerHTML = `
